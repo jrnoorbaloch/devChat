@@ -1,0 +1,57 @@
+<!-- title: Configuration -->
+<!-- description: Configure devChat with DEVCHAT_ environment variables or builder options, choose a puppet provider for WeChat, WhatsApp, WeCom or Lark, and run it in Docker. -->
+<!-- order: 3 -->
+<h1>Configuration</h1>
+<p class="lead">Configure devChat with builder options in code, or with environment variables for deployments.</p>
+
+<h2 id="builder">Builder options</h2>
+<pre><code>const bot = DevChatBuilder.build({
+  name: 'support-bot',              // also used for the session file name
+  puppet: 'wechaty-puppet-wechat4u',
+  puppetOptions: { /* passed to the puppet */ },
+})</code></pre>
+<p>Use <code>DevChatBuilder.singleton(options)</code> when your whole process should share one bot.</p>
+
+<h2 id="env">Environment variables</h2>
+<p>Every setting has a <code>DEVCHAT_</code> name. The legacy <code>WECHATY_</code> name still works. If both are set, <code>DEVCHAT_</code> wins.</p>
+<table>
+  <thead><tr><th>Variable</th><th>Legacy name</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>DEVCHAT_PUPPET</code></td><td><code>WECHATY_PUPPET</code></td><td>Puppet provider package name</td></tr>
+    <tr><td><code>DEVCHAT_TOKEN</code></td><td><code>WECHATY_TOKEN</code></td><td>Token for puppet services</td></tr>
+    <tr><td><code>DEVCHAT_NAME</code></td><td><code>WECHATY_NAME</code></td><td>Bot name / session file</td></tr>
+    <tr><td><code>DEVCHAT_PORT</code></td><td><code>WECHATY_PORT</code></td><td>HTTP port (<code>PORT</code> takes priority)</td></tr>
+    <tr><td><code>DEVCHAT_PUPPET_SERVICE_IP</code></td><td><code>WECHATY_PUPPET_SERVICE_IP</code></td><td>Fixed IP of a puppet service</td></tr>
+    <tr><td><code>DEVCHAT_APIHOST</code></td><td><code>WECHATY_APIHOST</code></td><td>API host for the IO client</td></tr>
+    <tr><td><code>DEVCHAT_DEBUG</code></td><td><code>WECHATY_DEBUG</code></td><td>Enable debug mode</td></tr>
+    <tr><td><code>DEVCHAT_DOCKER</code></td><td><code>WECHATY_DOCKER</code></td><td>Set when running inside Docker</td></tr>
+    <tr><td><code>WECHATY_LOG</code></td><td>—</td><td>Log level: <code>silly</code>, <code>verbose</code>, <code>info</code>, <code>warn</code>, <code>error</code></td></tr>
+  </tbody>
+</table>
+<p>Read settings the same way in your own code with <code>envSetting('PUPPET')</code>.</p>
+
+<h2 id="puppets">Puppet providers</h2>
+<p>A puppet is the driver that connects devChat to a messenger. Install the one you need, then select it:</p>
+<table>
+  <thead><tr><th>Messenger</th><th>Puppet package</th></tr></thead>
+  <tbody>
+    <tr><td>WeChat (web protocol, default)</td><td><code>wechaty-puppet-wechat4u</code></td></tr>
+    <tr><td>WeChat (browser)</td><td><code>wechaty-puppet-wechat</code></td></tr>
+    <tr><td>WeChat (iPad protocol)</td><td><code>wechaty-puppet-padlocal</code></td></tr>
+    <tr><td>WhatsApp</td><td><code>wechaty-puppet-whatsapp</code></td></tr>
+    <tr><td>Lark / Feishu</td><td><code>wechaty-puppet-lark</code></td></tr>
+    <tr><td>Gitter</td><td><code>wechaty-puppet-gitter</code></td></tr>
+    <tr><td>QQ</td><td><code>wechaty-puppet-oicq</code></td></tr>
+    <tr><td>WeChat Official Account</td><td><code>wechaty-puppet-official-account</code></td></tr>
+    <tr><td>Remote puppet service</td><td><code>wechaty-puppet-service</code></td></tr>
+    <tr><td>Testing</td><td><code>wechaty-puppet-mock</code></td></tr>
+  </tbody>
+</table>
+<pre><code>npm install wechaty-puppet-whatsapp
+DEVCHAT_PUPPET=wechaty-puppet-whatsapp node bot.ts</code></pre>
+<p>Run <code>npm run puppet-install</code> to install all official puppets. <code>npm run doctor</code> checks your environment.</p>
+
+<h2 id="docker">Docker</h2>
+<pre><code>docker build -t devchat .
+docker run -it --rm -e DEVCHAT_PUPPET=wechaty-puppet-wechat4u \
+  -v "$PWD":/bot devchat bot.ts</code></pre>

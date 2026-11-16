@@ -1,0 +1,65 @@
+<!-- title: Getting started -->
+<!-- description: Install devChat, run your first TypeScript chatbot in minutes, and learn the bot lifecycle: scan, login, message and logout events. -->
+<!-- order: 1 -->
+<h1>Getting started</h1>
+<p class="lead">Run your first devChat bot in a few minutes. You need Node.js 26 or newer and npm 10 or newer.</p>
+
+<h2 id="install">1. Get the code</h2>
+<p>devChat is not on npm yet. Until it is, clone the repository and install its dependencies:</p>
+<pre><code>git clone https://github.com/jrnoorbaloch/devChat.git
+cd devChat
+npm install</code></pre>
+<div class="note">To use devChat inside another project, build and pack it once with <code>npm run dist &amp;&amp; npm pack</code>. Then run <code>npm install /path/to/devchat-&lt;version&gt;.tgz</code> in your project and <code>import { DevChatBuilder } from 'devchat'</code>.</div>
+
+<h2 id="run">2. Run an example bot</h2>
+<pre><code># minimal "ding → dong" bot
+npm run demo
+
+# command bot with /ping, /echo, /roll, /time and /help
+npm run demo:commands</code></pre>
+<p>The bot prints a QR code in your terminal. Scan it with the messenger account the bot should use. Once you are logged in, send <code>/help</code> to the bot from another account.</p>
+
+<h2 id="first-bot">3. Write your own bot</h2>
+<p>Create <code>bot.ts</code>. Node.js 26 runs TypeScript directly, so there is no build step:</p>
+<pre><code>import { DevChatBuilder, ScanStatus, CommandRouter } from 'devchat'
+
+const bot = DevChatBuilder.build({ name: 'my-first-bot' })
+
+bot.use(CommandRouter({
+  commands: {
+    ping: () =&gt; 'pong',
+    hello: ({ args }) =&gt; `Hello, ${args[0] ?? 'friend'}!`,
+  },
+}))
+
+bot
+  .on('scan', (qrcode, status) =&gt; {
+    if (status === ScanStatus.Waiting) {
+      console.log('Scan this QR code to log in:', qrcode)
+    }
+  })
+  .on('login',  user =&gt; console.log(`${user.name()} logged in`))
+  .on('logout', user =&gt; console.log(`${user.name()} logged out`))
+  .on('message', async message =&gt; {
+    console.log(`${message.talker().name()}: ${message.text()}`)
+  })
+
+await bot.start()</code></pre>
+<pre><code>node bot.ts</code></pre>
+
+<h2 id="lifecycle">4. Understand the lifecycle</h2>
+<table>
+  <thead><tr><th>Step</th><th>What happens</th><th>Event</th></tr></thead>
+  <tbody>
+    <tr><td><code>bot.start()</code></td><td>Loads the puppet (messenger driver) and connects</td><td><code>start</code>, <code>puppet</code></td></tr>
+    <tr><td>Scan</td><td>A login QR code is generated</td><td><code>scan</code></td></tr>
+    <tr><td>Login</td><td>The account is logged in; <code>bot.currentUser</code> is set</td><td><code>login</code>, <code>ready</code></td></tr>
+    <tr><td>Chat</td><td>Every incoming and outgoing message</td><td><code>message</code></td></tr>
+    <tr><td><code>bot.stop()</code></td><td>Disconnects and releases resources</td><td><code>logout</code>, <code>stop</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="choose-puppet">5. Choose a messenger</h2>
+<p>devChat talks to messengers through <em>puppets</em>. The default is <code>wechaty-puppet-wechat4u</code> (WeChat web protocol). Pick a different one with an environment variable:</p>
+<pre><code>DEVCHAT_PUPPET=wechaty-puppet-whatsapp node bot.ts</code></pre>
+<p>See <a href="/configuration">Configuration</a> for every setting and the list of supported puppets.</p>

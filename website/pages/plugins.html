@@ -1,0 +1,99 @@
+<!-- title: Built-in plugins -->
+<!-- nav: Plugins -->
+<!-- description: Use devChat's built-in CommandRouter, AutoReply and RateLimiter plugins to add slash commands, keyword auto-replies and per-user rate limiting to any chatbot. -->
+<!-- order: 2 -->
+<h1>Built-in plugins</h1>
+<p class="lead">devChat ships three plugins for the jobs almost every bot needs. They are plain functions, so you can mix them with your own <code>on('message')</code> handlers and any Wechaty-compatible plugin.</p>
+
+<pre><code>import { CommandRouter, AutoReply, RateLimiter } from 'devchat'
+// or: import { CommandRouter } from 'devchat/plugins'</code></pre>
+
+<h2 id="command-router">CommandRouter</h2>
+<p>Routes messages that start with a prefix (default <code>/</code>) to named handlers. Whatever a handler returns is sent back as the reply.</p>
+<pre><code>bot.use(CommandRouter({
+  commands: {
+    ping: () =&gt; 'pong',
+    echo: {
+      description: 'Repeat your text',
+      aliases: ['say'],
+      handler: ({ rawArgs }) =&gt; rawArgs || 'Usage: /echo &lt;text&gt;',
+    },
+    remind: async ({ args, message }) =&gt; {
+      const [minutes, ...text] = args
+      setTimeout(() =&gt; message.say(`⏰ ${text.join(' ')}`), Number(minutes) * 60_000)
+      return `OK, I will remind you in ${minutes} min.`
+    },
+  },
+  rateLimit: { limit: 10, intervalMs: 60_000 },
+  requireMentionInRoom: true,
+  unknownReply: 'Unknown command /{command}. Try /help.',
+}))</code></pre>
+
+<h3>Argument parsing</h3>
+<p>Arguments are split on whitespace. Single or double quotes group words together:</p>
+<table>
+  <thead><tr><th>Message</th><th><code>command</code></th><th><code>args</code></th><th><code>rawArgs</code></th></tr></thead>
+  <tbody>
+    <tr><td><code>/ping</code></td><td><code>ping</code></td><td><code>[]</code></td><td><code>''</code></td></tr>
+    <tr><td><code>/todo add "buy milk" now</code></td><td><code>todo</code></td><td><code>['add', 'buy milk', 'now']</code></td><td><code>add "buy milk" now</code></td></tr>
+  </tbody>
+</table>
+<p>The same parser is exported as <code>parseCommand(text, prefix)</code>.</p>
+
+<h3>Options</h3>
+<table>
+  <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>commands</code></td><td>required</td><td>Map of name → handler, or → <code>{ handler, description, aliases }</code></td></tr>
+    <tr><td><code>prefix</code></td><td><code>'/'</code></td><td>Command prefix, e.g. <code>'!'</code></td></tr>
+    <tr><td><code>help</code></td><td><code>true</code></td><td>Adds a <code>/help</code> command listing every command (your own <code>help</code> wins)</td></tr>
+    <tr><td><code>caseSensitive</code></td><td><code>false</code></td><td>Match command names case-sensitively</td></tr>
+    <tr><td><code>ignoreSelf</code></td><td><code>true</code></td><td>Ignore messages the bot sent itself</td></tr>
+    <tr><td><code>requireMentionInRoom</code></td><td><code>false</code></td><td>In group chats, only react when the bot is @-mentioned</td></tr>
+    <tr><td><code>rateLimit</code></td><td>off</td><td><code>{ limit, intervalMs }</code> per sender</td></tr>
+    <tr><td><code>rateLimitedReply</code></td><td>a short notice</td><td>Text sent when throttled, or <code>false</code> for silence</td></tr>
+    <tr><td><code>unknownReply</code></td><td><code>false</code></td><td>Reply for unknown commands; <code>{command}</code> is replaced</td></tr>
+    <tr><td><code>onError</code></td><td>logs to console</td><td>Called when a handler throws. The bot keeps running.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="auto-reply">AutoReply</h2>
+<p>Answers messages that match declarative rules. Rules are checked in order and only the first match replies, unless you set <code>firstMatchOnly: false</code>.</p>
+<pre><code>bot.use(AutoReply({
+  rules: [
+    // whole message, case-insensitive
+    { match: 'hi', reply: 'Hello! 👋' },
+    // substring
+    { match: 'pricing', contains: true, reply: 'Plans start at $9/month.' },
+    // RegExp – the match is passed to the reply function
+    { match: /weather in (\w+)/i, reply: (_msg, m) =&gt; `Checking weather for ${m?.[1]}…` },
+    // any predicate
+    { match: text =&gt; text.endsWith('?'), reply: 'Good question! A human will answer soon.' },
+  ],
+  rooms: true,
+  requireMentionInRoom: true,
+  rateLimit: { limit: 5, intervalMs: 60_000 },
+}))</code></pre>
+<div class="note">Rate limits in <code>AutoReply</code> only count messages that matched a rule, so normal chatter never uses up a user's quota.</div>
+
+<h2 id="rate-limiter">RateLimiter</h2>
+<p>The sliding-window limiter the plugins use is exported for your own handlers:</p>
+<pre><code>const limiter = new RateLimiter({ limit: 3, intervalMs: 10_000 })
+
+bot.on('message', async message =&gt; {
+  if (!limiter.tryAcquire(message.talker().id)) return
+  // ... expensive work, e.g. calling an LLM
+})</code></pre>
+<p>Methods: <code>tryAcquire(key)</code>, <code>remaining(key)</code>, <code>reset(key?)</code>.</p>
+
+<h2 id="custom">Writing your own plugin</h2>
+<p>A plugin is a function that receives the bot and may return an uninstaller:</p>
+<pre><code>import type { DevChatPlugin } from 'devchat'
+
+export const Logger = (): DevChatPlugin =&gt; bot =&gt; {
+  const onMessage = (m) =&gt; console.log('[msg]', m.text())
+  bot.on('message', onMessage)
+  return () =&gt; bot.off('message', onMessage)
+}
+
+bot.use(Logger())</code></pre>

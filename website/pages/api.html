@@ -1,0 +1,82 @@
+<!-- title: API reference -->
+<!-- nav: API reference -->
+<!-- description: devChat API reference: the bot, events, Message, Contact and Room classes, sending text, files and links, and finding contacts and group chats. -->
+<!-- order: 4 -->
+<h1>API reference</h1>
+<p class="lead">This page covers the APIs you will use most often. The TypeScript types in <a href="https://github.com/jrnoorbaloch/devChat/tree/main/src">src/</a> are the full, authoritative reference.</p>
+
+<h2 id="bot">The bot</h2>
+<table>
+  <thead><tr><th>Member</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>DevChatBuilder.build(options?)</code></td><td>Create a new bot (<code>WechatyBuilder</code> is the same function)</td></tr>
+    <tr><td><code>bot.start()</code> / <code>bot.stop()</code></td><td>Connect / disconnect</td></tr>
+    <tr><td><code>bot.logout()</code></td><td>Log the account out</td></tr>
+    <tr><td><code>bot.use(...plugins)</code></td><td>Install plugins</td></tr>
+    <tr><td><code>bot.on(event, listener)</code></td><td>Subscribe to an event</td></tr>
+    <tr><td><code>bot.isLoggedIn</code></td><td><code>true</code> after login</td></tr>
+    <tr><td><code>bot.currentUser</code></td><td>The logged-in account (<code>ContactSelf</code>)</td></tr>
+    <tr><td><code>bot.say(sayable)</code></td><td>Send to the bot's own account (file helper)</td></tr>
+    <tr><td><code>bot.Contact</code>, <code>bot.Room</code>, <code>bot.Message</code>, …</td><td>User modules bound to this bot</td></tr>
+  </tbody>
+</table>
+
+<h2 id="events">Events</h2>
+<table>
+  <thead><tr><th>Event</th><th>Listener arguments</th></tr></thead>
+  <tbody>
+    <tr><td><code>scan</code></td><td><code>(qrcode, status)</code></td></tr>
+    <tr><td><code>login</code></td><td><code>(user)</code></td></tr>
+    <tr><td><code>logout</code></td><td><code>(user, reason?)</code></td></tr>
+    <tr><td><code>message</code></td><td><code>(message)</code></td></tr>
+    <tr><td><code>friendship</code></td><td><code>(friendship)</code></td></tr>
+    <tr><td><code>room-join</code></td><td><code>(room, inviteeList, inviter, date?)</code></td></tr>
+    <tr><td><code>room-leave</code></td><td><code>(room, leaverList, remover?, date?)</code></td></tr>
+    <tr><td><code>room-topic</code></td><td><code>(room, newTopic, oldTopic, changer, date?)</code></td></tr>
+    <tr><td><code>room-invite</code></td><td><code>(roomInvitation)</code></td></tr>
+    <tr><td><code>post</code></td><td><code>(post)</code></td></tr>
+    <tr><td><code>ready</code>, <code>start</code>, <code>stop</code></td><td>none</td></tr>
+    <tr><td><code>heartbeat</code></td><td><code>(data)</code></td></tr>
+    <tr><td><code>error</code></td><td><code>(error)</code></td></tr>
+  </tbody>
+</table>
+
+<h2 id="message">Message</h2>
+<table>
+  <thead><tr><th>Method</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>text()</code></td><td>Message text</td></tr>
+    <tr><td><code>type()</code></td><td>Message type (<code>types.Message.Text</code>, <code>Image</code>, …)</td></tr>
+    <tr><td><code>talker()</code></td><td>Who sent it</td></tr>
+    <tr><td><code>room()</code></td><td>The group chat, or <code>undefined</code> for direct messages</td></tr>
+    <tr><td><code>self()</code></td><td><code>true</code> if the bot sent it</td></tr>
+    <tr><td><code>say(sayable)</code></td><td>Reply in the same conversation</td></tr>
+    <tr><td><code>mentionSelf()</code></td><td>Whether the bot was @-mentioned</td></tr>
+    <tr><td><code>mentionList()</code>, <code>mentionText()</code></td><td>Mentioned contacts / text without mentions</td></tr>
+    <tr><td><code>forward(to)</code>, <code>recall()</code></td><td>Forward / unsend</td></tr>
+    <tr><td><code>date()</code>, <code>age()</code></td><td>Timestamp / age in seconds</td></tr>
+    <tr><td><code>toFileBox()</code>, <code>toImage()</code>, <code>toContact()</code>, <code>toUrlLink()</code>, <code>toLocation()</code></td><td>Convert attachments</td></tr>
+  </tbody>
+</table>
+
+<h2 id="sending">Sending messages</h2>
+<p>Anything "sayable" can be sent with <code>say()</code>: text, files, contacts, links and more.</p>
+<pre><code>import { FileBox } from 'file-box'
+
+await message.say('Plain text')
+await message.say(FileBox.fromUrl('https://example.com/report.pdf'))
+await message.say(new bot.UrlLink({ url: 'https://github.com/jrnoorbaloch/devChat', title: 'devChat' }))
+
+// mention people in a room
+const room = message.room()
+if (room) await room.say`Hi ${message.talker()}, welcome!`</code></pre>
+
+<h2 id="contacts-rooms">Contacts and rooms</h2>
+<pre><code>const alice   = await bot.Contact.find({ name: 'Alice' })
+const friends = await bot.Contact.findAll()
+await alice?.say('Hello Alice')
+
+const room = await bot.Room.find({ topic: 'devChat users' })
+await room?.say('Release 2.0 is out 🎉')
+await room?.add(alice!)
+const members = await room?.memberAll()</code></pre>

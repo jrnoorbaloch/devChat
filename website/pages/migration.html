@@ -1,0 +1,39 @@
+<!-- title: Migrating from Wechaty -->
+<!-- nav: Migrating from Wechaty -->
+<!-- description: Move an existing Wechaty bot to devChat in minutes. devChat is API-compatible with Wechaty, so imports, puppets, plugins and WECHATY_ environment variables keep working. -->
+<!-- order: 5 -->
+<h1>Migrating from Wechaty</h1>
+<p class="lead">devChat is a fork of Wechaty and keeps its API, so most bots move over by changing one import.</p>
+
+<h2 id="steps">Steps</h2>
+<ol>
+  <li>Replace the dependency: remove <code>wechaty</code> and install devChat (see <a href="/getting-started">Getting started</a>).</li>
+  <li>Change imports from <code>'wechaty'</code> to <code>'devchat'</code>.</li>
+  <li>Optionally rename to the devChat brand names (<code>DevChatBuilder</code>, <code>DevChat</code>, <code>DevChatPlugin</code>).</li>
+  <li>Optionally rename environment variables from <code>WECHATY_*</code> to <code>DEVCHAT_*</code>.</li>
+</ol>
+<pre><code>- import { WechatyBuilder } from 'wechaty'
++ import { DevChatBuilder } from 'devchat'
+
+- const bot = WechatyBuilder.build()
++ const bot = DevChatBuilder.build()</code></pre>
+
+<h2 id="kept">What stays the same</h2>
+<ul>
+  <li>All <code>Wechaty*</code> exports (<code>WechatyBuilder</code>, <code>Wechaty</code>, <code>WechatyPlugin</code>, …).</li>
+  <li>All <code>wechaty-puppet-*</code> providers and community plugins.</li>
+  <li>Events, user modules (<code>Contact</code>, <code>Room</code>, <code>Message</code>, …) and their methods.</li>
+  <li><code>WECHATY_*</code> environment variables. If both a <code>DEVCHAT_*</code> and a <code>WECHATY_*</code> variable are set, the <code>DEVCHAT_*</code> one wins.</li>
+</ul>
+
+<h2 id="changed">What changed</h2>
+<table>
+  <thead><tr><th>Wechaty</th><th>devChat</th></tr></thead>
+  <tbody>
+    <tr><td>package <code>wechaty</code></td><td>package <code>devchat</code></td></tr>
+    <tr><td>CLI <code>wechaty</code>, <code>wechaty-doctor</code>, <code>wechaty-version</code>, …</td><td><code>devchat</code>, <code>devchat-doctor</code>, <code>devchat-version</code>, …</td></tr>
+    <tr><td>—</td><td>New: <code>CommandRouter</code>, <code>AutoReply</code>, <code>RateLimiter</code>, <code>envSetting</code></td></tr>
+  </tbody>
+</table>
+
+<div class="note">devChat keeps Wechaty's Apache-2.0 license and credits the original authors in its NOTICE file. Thank you to Huan Li and every Wechaty contributor.</div>

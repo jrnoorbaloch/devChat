@@ -1,0 +1,20 @@
+devChat - an open-source TypeScript chatbot SDK for developers.
+Copyright 2026-now jrnoorbaloch and devChat contributors.
+https://github.com/jrnoorbaloch/devChat
+
+devChat is a fork of Wechaty and is distributed under the same
+Apache License, Version 2.0. Files modified by devChat are marked in
+their headers. New devChat modules (for example src/plugins/) carry
+the devChat header.
+
+----------------------------------------------------------------------
+Original NOTICE from Wechaty (retained as required by the license):
+
+Wechaty is a Conversational SDK for Chatbot Makers.
+Copyright 2016-now Huan (李卓桓) and Wechaty Community Contributors.
+
+This product includes software developed at
+The Wechaty Organization (https://github.com/wechaty).
+
+This software contains code derived from the Stackoverflow,
+including various modifications by GitHub.
