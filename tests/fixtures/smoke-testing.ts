@@ -20,27 +20,27 @@
  *
  */
 import {
-  WechatyBuilder,
+  DevChatBuilder,
   VERSION,
-}                   from 'wechaty'
-import type { Wechaty } from 'wechaty'
+}                   from 'devchat'
+import type { DevChat } from 'devchat'
 
-import * as USERS from 'wechaty/users'
-import * as IMPLS from 'wechaty/impls'
+import * as USERS from 'devchat/users'
+import * as IMPLS from 'devchat/impls'
 
 import assert from 'assert'
 
-function publicTypeContract (bot: Wechaty, contact: USERS.Contact) {
+function publicTypeContract (bot: DevChat, contact: USERS.Contact) {
   bot.on('message', message => {
     const messageId: string = message.id
     void message.say('hello')
     void messageId
   })
 
-  const sayable: import('wechaty').Sayable = contact
+  const sayable: import('devchat').Sayable = contact
   void bot.say(sayable)
 
-  const implementationConstructor: typeof IMPLS.WechatyImpl = IMPLS.WechatyImpl
+  const implementationConstructor: typeof IMPLS.DevChatImpl = IMPLS.DevChatImpl
   void implementationConstructor
 
   // @ts-expect-error Internal options are not part of the public interface.
@@ -48,23 +48,23 @@ function publicTypeContract (bot: Wechaty, contact: USERS.Contact) {
 }
 void publicTypeContract
 
-function getBotList (): Wechaty[] {
+function getBotList (): DevChat[] {
   const botList = [
-    WechatyBuilder.build({ puppet: 'wechaty-puppet-mock' }),
-    // new Wechaty({ puppet: 'wechaty-puppet-wechat4u' }),
-    // new Wechaty({ puppet: 'wechaty-puppet-puppeteer' }),
+    DevChatBuilder.build({ puppet: 'wechaty-puppet-mock' }),
+    // new DevChat({ puppet: 'wechaty-puppet-wechat4u' }),
+    // new DevChat({ puppet: 'wechaty-puppet-puppeteer' }),
   ]
 
-  if (process.env.WECHATY_PUPPET_SERVICE_TOKEN) {
+  if (process.env.DEVCHAT_PUPPET_SERVICE_TOKEN) {
     botList.push(
-      WechatyBuilder.build({
+      DevChatBuilder.build({
         puppet: 'wechaty-puppet-service',
       })
     )
   }
-  if (process.env.WECHATY_PUPPET_PADLOCAL_TOKEN) {
+  if (process.env.DEVCHAT_PUPPET_PADLOCAL_TOKEN) {
     botList.push(
-      WechatyBuilder.build({
+      DevChatBuilder.build({
         puppet: 'wechaty-puppet-padlocal',
       })
     )
@@ -80,7 +80,7 @@ async function main () {
       botList.map(bot => bot.start()),
     )
     for (const bot of botList) {
-      console.info(`Wechaty v${bot.version()} smoking test passed.`)
+      console.info(`DevChat v${bot.version()} smoking test passed.`)
     }
   } catch (e) {
     console.error(e)

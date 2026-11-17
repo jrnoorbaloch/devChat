@@ -24,27 +24,27 @@ import assert from 'node:assert/strict'
 
 import { PuppetMock } from 'wechaty-puppet-mock'
 
-import type { Wechaty } from './mods/mod.ts'
-import { WechatyBuilder } from './wechaty-builder.ts'
+import type { DevChat } from './mods/mod.ts'
+import { DevChatBuilder } from './devchat-builder.ts'
 
 import {
-  type WechatyPlugin,
-  isWechatyPluginUninstaller,
+  type DevChatPlugin,
+  isDevChatPluginUninstaller,
 }                               from './plugin.ts'
 
 /**
  *
  * Huan(202111): we are not remove plugins in the `stop()` method.
- *  @see https://github.com/wechaty/wechaty/issues/2282#issuecomment-966008175
+ *  @see upstream issue #2282
  *
  * TODO: make sure to not remove or remote, then remove this comment
  *
  */
-test('Wechaty Plugin uninstaller should be called after wechaty.stop()', async t => {
+test('DevChat Plugin uninstaller should be called after devchat.stop()', async t => {
   const spyPluginInstall    = t.mock.fn()
   const spyPluginUninstall  = t.mock.fn()
 
-  const bot = WechatyBuilder.build({ puppet: new PuppetMock() })
+  const bot = DevChatBuilder.build({ puppet: new PuppetMock() })
   let started = false
   t.after(async () => {
     if (started) {
@@ -52,7 +52,7 @@ test('Wechaty Plugin uninstaller should be called after wechaty.stop()', async t
     }
   })
 
-  const plugin: WechatyPlugin = (_bot: Wechaty) => {
+  const plugin: DevChatPlugin = (_bot: DevChat) => {
     spyPluginInstall()
     return () => {
       spyPluginUninstall()
@@ -82,13 +82,13 @@ test('Wechaty Plugin uninstaller should be called after wechaty.stop()', async t
   assert.equal(spyPluginUninstall.mock.callCount(), 1, 'should called uninstall spy after call uninstaller()')
 })
 
-test('isWechatyPluginUninstaller()', async _t => {
+test('isDevChatPluginUninstaller()', async _t => {
   const FIXTURES = [
     [ undefined, false ],
     [ () => {}, true ],
   ] as const
 
   for (const [ uninstaller, expected ] of FIXTURES) {
-    assert.equal(isWechatyPluginUninstaller(uninstaller), expected, `isWechatyPluginUninstaller(${uninstaller}) === ${expected}`)
+    assert.equal(isDevChatPluginUninstaller(uninstaller), expected, `isDevChatPluginUninstaller(${uninstaller}) === ${expected}`)
   }
 })

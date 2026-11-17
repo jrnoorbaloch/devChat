@@ -21,16 +21,16 @@ npm run dist
 DOCS_INDEX_MD=docs/index.md
 
 cat <<_EOF_ > "$DOCS_INDEX_MD"
-# Wechaty v$(jq -r .version package.json) Documentation
+# DevChat v$(jq -r .version package.json) Documentation
 
-- Website - <https://wechaty.js.org>
-- Docs Site - <https://wechaty.js.org/docs/>
-- API References - <https://wechaty.github.io/wechaty/>
+- Website - <https://devchat-docs.vercel.app>
+- Docs Site - <https://devchat-docs.vercel.app>
+- API References - <https://devchat-docs.vercel.app>
 
 _EOF_
 
 jsdoc2md \
-  dist/src/wechaty.js \
+  dist/src/devchat.js \
   dist/src/user/{room,contact,contact-self,friendship,message,room-invitation}.js \
   >> "$DOCS_INDEX_MD"
 
@@ -40,7 +40,7 @@ jsdoc2md \
 cat <<_EOF_ >> "$DOCS_INDEX_MD"
 <script>
   ((window.gitter = {}).chat = {}).options = {
-    room: 'chatie/wechaty'
+    room: 'chatie/devchat'
   };
 </script>
 <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>

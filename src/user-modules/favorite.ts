@@ -23,11 +23,11 @@ import type { Constructor } from 'clone-class'
 import { validationMixin } from '../user-mixins/validation.ts'
 
 import {
-  wechatifyMixinBase,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                       from '../user-mixins/devchatify.ts'
 import type { TagInterface } from './tag.ts'
 
-class FavoriteMixin extends wechatifyMixinBase() {
+class FavoriteMixin extends devchatifyMixinBase() {
 
   static list (): FavoriteInterface[] {
     return []
@@ -39,7 +39,7 @@ class FavoriteMixin extends wechatifyMixinBase() {
    * @static
    * @returns {Promise<TagInterface[]>}
    * @example
-   * const tags = await wechaty.Favorite.tags()
+   * const tags = await devchat.Favorite.tags()
    */
   static async tags (): Promise<TagInterface[]> {
     log.verbose('Favorite', 'static tags() for %s', this)
@@ -47,7 +47,7 @@ class FavoriteMixin extends wechatifyMixinBase() {
     // TODO:
     // try {
     //   const tagIdList = await this.puppet.tagFavoriteList()
-    //   const tagList = tagIdList.map(id => this.wechaty.Tag.load(id))
+    //   const tagList = tagIdList.map(id => this.devchat.Tag.load(id))
     //   return tagList
     // } catch (e) {
     //   log.error('Favorite', 'static tags() exception: %s', e.message)

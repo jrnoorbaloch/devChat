@@ -22,10 +22,10 @@ import type { Constructor } from 'clone-class'
 import { validationMixin } from '../user-mixins/validation.ts'
 
 import {
-  wechatifyMixinBase,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                       from '../user-mixins/devchatify.ts'
 
-class DelayMixin extends wechatifyMixinBase() {
+class DelayMixin extends devchatifyMixinBase() {
 
   public milliseconds: number
 

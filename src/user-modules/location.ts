@@ -24,10 +24,10 @@ import { log } from '../config.ts'
 
 import { validationMixin }  from '../user-mixins/validation.ts'
 import {
-  wechatifyMixinBase,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                       from '../user-mixins/devchatify.ts'
 
-class LocationMixin extends wechatifyMixinBase() {
+class LocationMixin extends devchatifyMixinBase() {
 
   public readonly payload: PUPPET.payloads.Location
 
@@ -60,8 +60,8 @@ class LocationMixin extends wechatifyMixinBase() {
     super()
     this.payload = payload
     log.verbose('Location', 'constructor()')
-    // Huan(202110): it is ok to create a raw one without wechaty instance
-    // guardWechatifyClass.call(this, Location)
+    // Huan(202110): it is ok to create a raw one without devchat instance
+    // guardDevChatifyClass.call(this, Location)
   }
 
   override toString (): string {

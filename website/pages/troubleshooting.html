@@ -1,0 +1,48 @@
+<!-- title: Troubleshooting -->
+<!-- description: Fix common devChat installation and login problems: old Node.js, npm errors, WhatsApp Chrome download, QR code not showing, and bots that do not reply. -->
+<!-- order: 5 -->
+<h1>Troubleshooting</h1>
+<p class="lead">The installer and <code>npm run setup</code> print a fix for every known problem. This page collects them in one place.</p>
+
+<h2 id="node">"devChat needs Node.js 26 or newer"</h2>
+<ul>
+  <li><strong>Windows:</strong> <code>winget install OpenJS.NodeJS.LTS</code>, then open a <em>new</em> PowerShell window.</li>
+  <li><strong>macOS:</strong> <code>brew install node</code></li>
+  <li><strong>Linux:</strong> <code>nvm install 26</code> (install nvm from <a href="https://github.com/nvm-sh/nvm" rel="noopener">github.com/nvm-sh/nvm</a>)</li>
+</ul>
+<p>Check with <code>node --version</code>. It must print v26 or higher.</p>
+
+<h2 id="npm">npm install fails</h2>
+<ul>
+  <li>Check your internet connection, VPN or proxy, then rerun the installer. It updates the existing folder instead of starting over.</li>
+  <li>Do not use <code>sudo npm</code>. If npm reports permission errors, install Node.js with nvm or winget as shown above.</li>
+  <li>Behind a company proxy: <code>npm config set proxy http://proxy:port</code> and <code>npm config set https-proxy http://proxy:port</code>.</li>
+</ul>
+
+<h2 id="chrome">WhatsApp: Chrome download fails</h2>
+<p>WhatsApp runs through a headless Chrome. If downloading Chrome is blocked on your network, use a Chrome that is already installed:</p>
+<pre><code># macOS / Linux
+PUPPETEER_SKIP_DOWNLOAD=1 npm run setup -- --messenger whatsapp
+export PUPPETEER_EXECUTABLE_PATH="/usr/bin/google-chrome"
+npm start</code></pre>
+<pre><code># Windows PowerShell
+$env:PUPPETEER_SKIP_DOWNLOAD="1"; npm run setup -- --messenger whatsapp
+$env:PUPPETEER_EXECUTABLE_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
+npm start</code></pre>
+
+<h2 id="not-installed">"[WhatsApp] is not installed yet"</h2>
+<p>The WhatsApp driver is installed by setup, not by <code>npm install</code>. Run <code>npm run setup</code> again; it only installs what is missing.</p>
+
+<h2 id="qr">The QR code is unreadable in the terminal</h2>
+<p>Use the browser link printed under it (<code>https://devchat-docs.vercel.app/qrcode/…</code>). The code is drawn in your browser. Or make the terminal window wider, or use a font with square characters.</p>
+
+<h2 id="no-reply">The bot logs in but does not reply</h2>
+<ul>
+  <li>Send messages from a <em>different</em> account. Bots ignore their own messages by default.</li>
+  <li>In group chats, the starter bot only answers when it is @-mentioned (<code>requireMentionInRoom: true</code>).</li>
+  <li>If you spam it, the rate limiter pauses replies for a minute. This is intended.</li>
+</ul>
+
+<h2 id="debug">See technical details</h2>
+<pre><code>DEVCHAT_DEBUG=1 DEVCHAT_LOG=verbose npm start</code></pre>
+<p>Still stuck? <a href="https://github.com/jrnoorbaloch/devChat/issues">Open an issue</a> with the output, your OS, <code>node --version</code> and the messenger you picked.</p>

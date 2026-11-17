@@ -10,7 +10,7 @@ import type { Sayable } from './types.ts'
 async function messageToSayable (
   message: MessageInterface,
 ): Promise<undefined | Sayable> {
-  log.verbose('Wechaty', 'toSayable(%s)', message)
+  log.verbose('DevChat', 'toSayable(%s)', message)
 
   const type = message.type()
 
@@ -41,7 +41,7 @@ async function messageToSayable (
       return message.toPost()
 
     default:
-      log.warn('Wechaty',
+      log.warn('DevChat',
         'toSayable() can not convert not re-sayable type: %s(%s) for %s\n%s',
         PUPPET.types.Message[type],
         type,

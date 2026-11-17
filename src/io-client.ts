@@ -25,7 +25,7 @@ import {
 }                       from 'wechaty-puppet-service'
 
 import type { MessageInterface }  from './user-modules/mod.ts'
-import type { WechatyInterface }  from './wechaty/mod.ts'
+import type { DevChatInterface }  from './devchat/mod.ts'
 
 import {
   log,
@@ -34,7 +34,7 @@ import { Io }           from './io.ts'
 
 export interface IoClientOptions {
   token   : string,
-  wechaty : WechatyInterface,
+  devchat : DevChatInterface,
   port?: number
 }
 
@@ -90,7 +90,7 @@ export class IoClient {
        *  by updating the puppet-service server code
        *  to use PuppetInterface
        */
-      puppet   : this.options.wechaty.puppet as any,
+      puppet   : this.options.devchat.puppet as any,
       token    : this.options.token,
     }
     this.puppetServer = new PuppetServer(options)
@@ -121,11 +121,11 @@ export class IoClient {
     this.state.active('pending')
 
     try {
-      await this.hookWechaty(this.options.wechaty)
+      await this.hookDevChat(this.options.devchat)
 
       await this.startIo()
 
-      await this.options.wechaty.start()
+      await this.options.devchat.start()
 
       await this.startPuppetServer()
 
@@ -138,23 +138,23 @@ export class IoClient {
     }
   }
 
-  private async hookWechaty (wechaty: WechatyInterface): Promise<void> {
-    log.verbose('IoClient', 'hookWechaty()')
+  private async hookDevChat (devchat: DevChatInterface): Promise<void> {
+    log.verbose('IoClient', 'hookDevChat()')
 
     if (this.state.inactive()) {
       const e = new Error('state.off() is true, skipped')
-      log.warn('IoClient', 'initWechaty() %s', e.message)
+      log.warn('IoClient', 'initDevChat() %s', e.message)
       throw e
     }
 
-    wechaty
+    devchat
       .on('login',    user => log.info('IoClient', `${user.name()} logged in`))
       .on('logout',   user => log.info('IoClient', `${user.name()} logged out`))
       .on('message',  msg => this.onMessage(msg))
       .on('scan',     (url, code) => {
         log.info('IoClient', [
           `[${code}] ${url}`,
-          `Online QR Code Image: https://wechaty.js.org/qrcode/${encodeURIComponent(url)}`,
+          `Online QR Code Image: https://devchat-docs.vercel.app/qrcode/${encodeURIComponent(url)}`,
         ].join('\n'))
       })
   }
@@ -175,7 +175,7 @@ export class IoClient {
     this.io = new Io({
       servicePort : this.options.port,
       token      : this.options.token,
-      wechaty    : this.options.wechaty,
+      devchat    : this.options.devchat,
     })
 
     try {
@@ -212,7 +212,7 @@ export class IoClient {
     //               , m.toStringDigest()
     //         )
 
-    // if (/^wechaty|chatie|botie/i.test(m.text()) && !m.self()) {
+    // if (/^devchat|chatie|botie/i.test(m.text()) && !m.self()) {
     //   await m.say('https://www.chatie.io')
     //     .then(_ => log.info('Bot', 'REPLIED to magic word "chatie"'))
     // }
@@ -225,7 +225,7 @@ export class IoClient {
 
     await this.stopIo()
     await this.stopPuppetServer()
-    await this.options.wechaty.stop()
+    await this.options.devchat.stop()
 
     this.state.inactive(true)
 
@@ -256,10 +256,10 @@ export class IoClient {
     this.state.inactive('pending')
 
     try {
-      // if (this.options.wechaty) {
-      await this.options.wechaty.stop()
-      // this.wechaty = null
-      // } else { log.warn('IoClient', 'quit() no this.wechaty') }
+      // if (this.options.devchat) {
+      await this.options.devchat.stop()
+      // this.devchat = null
+      // } else { log.warn('IoClient', 'quit() no this.devchat') }
 
       if (this.io) {
         await this.io.stop()

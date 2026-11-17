@@ -41,7 +41,7 @@ test('getPeer()', async _t => {
 
   /**
    * Huan(202101) Need to be fixed by new IO Bus system.
-   *  See: https://github.com/wechaty/wechaty-puppet-service/issues/118
+   *  See: upstream wechaty-puppet-service issue #118
    */
   const port = await client.request('getHostieGrpcPort')
   assert.equal(port, EXPECTED_PORT, 'should get the right port')
@@ -55,7 +55,7 @@ test('exec()', async _t => {
 
   /**
    * Huan(202101) Need to be fixed by new IO Bus system.
-   *  See: https://github.com/wechaty/wechaty-puppet-service/issues/118
+   *  See: upstream wechaty-puppet-service issue #118
    */
   const request = jsonRpcPeer.format.request(42, 'getHostieGrpcPort')
   const response = await server.exec(request) as string

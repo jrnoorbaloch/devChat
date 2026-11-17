@@ -18,12 +18,12 @@
  *   limitations under the License.
  *
  */
-import type { WechatyInterface } from '../wechaty/mod.ts'
+import type { DevChatInterface } from '../devchat/mod.ts'
 
 interface Accepter {
   accept  : () => Promise<void>
   id      : string,
-  wechaty : WechatyInterface
+  devchat : DevChatInterface
 }
 
 export type  {

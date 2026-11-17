@@ -34,15 +34,15 @@ import type {
   ContactInterface,
 }               from './contact.ts'
 import {
-  wechatifyMixinBase,
-}                     from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                     from '../user-mixins/devchatify.ts'
 import { validationMixin } from '../user-mixins/validation.ts'
 
 /**
  *
  * accept room invitation
  */
-class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
+class RoomInvitationMixin extends devchatifyMixinBase() implements Accepter {
 
   public readonly id: string
 
@@ -77,7 +77,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
     * @ignore
    */
   async toStringAsync (): Promise<string> {
-    const payload = await this.wechaty.puppet.roomInvitationPayload(this.id)
+    const payload = await this.devchat.puppet.roomInvitationPayload(this.id)
     return [
       'RoomInvitation#',
       this.id,
@@ -95,7 +95,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    * @returns {Promise<void>}
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('room-invite', async roomInvitation => {
    *   try {
    *     console.log(`received room-invite event.`)
@@ -110,7 +110,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
     log.verbose('RoomInvitation', 'accept()')
 
     try {
-      await this.wechaty.puppet.roomInvitationAccept(this.id)
+      await this.devchat.puppet.roomInvitationAccept(this.id)
 
       const inviter = await this.inviter()
       const topic   = await this.topic()
@@ -120,7 +120,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
         inviter,
       )
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.warn('RoomInvitation', 'accept() rejection: %s',
         (e && (e as Error).message) || e,
       )
@@ -132,7 +132,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    *
    * @returns {ContactInterface}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('room-invite', async roomInvitation => {
    *   const inviter = await roomInvitation.inviter()
    *   const name = inviter.name()
@@ -143,8 +143,8 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
   async inviter (): Promise<ContactInterface> {
     log.verbose('RoomInvitation', 'inviter()')
 
-    const payload = await this.wechaty.puppet.roomInvitationPayload(this.id)
-    const inviter = await this.wechaty.Contact.find({ id: payload.inviterId })
+    const payload = await this.devchat.puppet.roomInvitationPayload(this.id)
+    const inviter = await this.devchat.Contact.find({ id: payload.inviterId })
 
     if (!inviter) {
       throw new Error('can not found inviter with id: ' + payload.inviterId)
@@ -157,7 +157,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    *
    * @returns {string}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('room-invite', async roomInvitation => {
    *   const topic = await roomInvitation.topic()
    *   console.log(`received room invitation event from room ${topic}`)
@@ -165,7 +165,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    * .start()
    */
   async topic (): Promise<string> {
-    const payload = await this.wechaty.puppet.roomInvitationPayload(this.id)
+    const payload = await this.devchat.puppet.roomInvitationPayload(this.id)
 
     return payload.topic || payload.topic || ''
   }
@@ -173,7 +173,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
   async memberCount (): Promise<number> {
     log.verbose('RoomInvitation', 'memberCount()')
 
-    const payload = await this.wechaty.puppet.roomInvitationPayload(this.id)
+    const payload = await this.devchat.puppet.roomInvitationPayload(this.id)
 
     return payload.memberCount || payload.memberCount || 0
   }
@@ -185,13 +185,13 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
   async memberList (): Promise<ContactInterface[]> {
     log.verbose('RoomInvitation', 'roomMemberList()')
 
-    const payload = await this.wechaty.puppet.roomInvitationPayload(this.id)
+    const payload = await this.devchat.puppet.roomInvitationPayload(this.id)
 
     const contactIdList = payload.memberIdList
 
     const contactListAll = await Promise.all(
       contactIdList.map(
-        id => this.wechaty.Contact.find({ id }),
+        id => this.devchat.Contact.find({ id }),
       ),
     )
 
@@ -207,7 +207,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
   async date (): Promise<Date> {
     log.verbose('RoomInvitation', 'date()')
 
-    const payload = await this.wechaty.puppet.roomInvitationPayload(this.id)
+    const payload = await this.devchat.puppet.roomInvitationPayload(this.id)
     return timestampToDate(payload.timestamp)
   }
 
@@ -215,7 +215,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    * Returns the roopm invitation age in seconds. <br>
    *
    * For example, the invitation is sent at time `8:43:01`,
-   * and when we received it in Wechaty, the time is `8:43:15`,
+   * and when we received it in DevChat, the time is `8:43:15`,
    * then the age() will return `8:43:15 - 8:43:01 = 14 (seconds)`
    * @returns {number}
    */
@@ -233,7 +233,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    *
    * @returns {RoomInvitationInterface}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * const dataFromDisk // get the room invitation info data from disk
    * const roomInvitation = await bot.RoomInvitation.fromJSON(dataFromDisk)
    * await roomInvitation.accept()
@@ -251,9 +251,9 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
       payload = JSON.parse(payload) as PUPPET.payloads.RoomInvitation
     }
 
-    await this.wechaty.puppet.roomInvitationPayload(payload.id, payload)
+    await this.devchat.puppet.roomInvitationPayload(payload.id, payload)
 
-    return this.wechaty.RoomInvitation.load(payload.id)
+    return this.devchat.RoomInvitation.load(payload.id)
   }
 
   /**
@@ -261,7 +261,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    *
    * @returns {string}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('room-invite', async roomInvitation => {
    *  const roomInvitation = bot.RoomInvitation.load(roomInvitation.id)
    *  const jsonData = await roomInvitation.toJSON(roomInvitation.id)
@@ -271,7 +271,7 @@ class RoomInvitationMixin extends wechatifyMixinBase() implements Accepter {
    */
   async toJSON (): Promise<string> {
     log.verbose('RoomInvitation', 'toJSON()')
-    const payload = await this.wechaty.puppet.roomInvitationPayload(this.id)
+    const payload = await this.devchat.puppet.roomInvitationPayload(this.id)
     return JSON.stringify(payload)
   }
 

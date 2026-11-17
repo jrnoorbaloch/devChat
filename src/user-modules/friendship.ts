@@ -39,8 +39,8 @@ import type {
   RoomInterface,
 }                       from './room.ts'
 import {
-  wechatifyMixin,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixin,
+}                       from '../user-mixins/devchatify.ts'
 import { validationMixin } from '../user-mixins/validation.ts'
 
 interface FriendshipAddOptionsObject {
@@ -51,7 +51,7 @@ interface FriendshipAddOptionsObject {
 
 type FriendshipAddOptions = string | FriendshipAddOptionsObject
 
-const MixinBase = wechatifyMixin(
+const MixinBase = devchatifyMixin(
   EventEmitter,
 )
 
@@ -62,7 +62,7 @@ const MixinBase = wechatifyMixin(
  * 2. receive request(in friend event)
  * 3. confirmation friendship(friend event)
  *
- * [Examples/Friend-Bot]{@link https://github.com/wechaty/wechaty/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/friend-bot.ts}
+ * [Examples/Friend-Bot]{@link https://github.com/jrnoorbaloch/devChat/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/friend-bot.ts}
  */
 class FriendshipMixin extends MixinBase implements Accepter {
 
@@ -103,13 +103,13 @@ class FriendshipMixin extends MixinBase implements Accepter {
     log.verbose('Friendship', 'static search("%s")',
       JSON.stringify(queryFilter),
     )
-    const contactId = await this.wechaty.puppet.friendshipSearch(queryFilter)
+    const contactId = await this.devchat.puppet.friendshipSearch(queryFilter)
 
     if (!contactId) {
       return undefined
     }
 
-    const contact = await this.wechaty.Contact.find({ id: contactId })
+    const contact = await this.devchat.Contact.find({ id: contactId })
     return contact
   }
 
@@ -125,13 +125,13 @@ class FriendshipMixin extends MixinBase implements Accepter {
    *
    * @example
    * const contact = await bot.Friendship.search({phone: '13112341234'})
-   * await bot.Friendship.add(contact, 'Nice to meet you! I am wechaty bot!')
+   * await bot.Friendship.add(contact, 'Nice to meet you! I am devchat bot!')
    *
    * const memberList = await room.memberList()
    * for (let i = 0; i < memberList.length; i++) {
    *   await bot.Friendship.add(member, {
    *     room: room,
-   *     hello: `Nice to meet you! I am wechaty bot from room: ${await room.topic()}!`,
+   *     hello: `Nice to meet you! I am devchat bot from room: ${await room.topic()}!`,
    *   })
    * }
    *
@@ -147,14 +147,14 @@ class FriendshipMixin extends MixinBase implements Accepter {
 
     if (typeof options === 'string') {
       log.warn('Friendship', 'the params hello is deprecated in the next version, please put the attr hello into options object, e.g. { hello: "xxxx" }')
-      await this.wechaty.puppet.friendshipAdd(contact.id, { hello: options })
+      await this.devchat.puppet.friendshipAdd(contact.id, { hello: options })
     } else {
       const friendOption: PUPPET.types.FriendshipAddOptions = {
         contactId: options.contact?.id,
         hello: options.hello,
         roomId: options.room && options.room.id,
       }
-      await this.wechaty.puppet.friendshipAdd(contact.id, friendOption)
+      await this.devchat.puppet.friendshipAdd(contact.id, friendOption)
     }
   }
 
@@ -214,7 +214,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
       return
     }
 
-    this.payload = await this.wechaty.puppet.friendshipPayload(this.id)
+    this.payload = await this.devchat.puppet.friendshipPayload(this.id)
 
     // if (!this.#payload) {
     //   throw new Error('no payload')
@@ -229,7 +229,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
    * @returns {Promise<void>}
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('friendship', async friendship => {
    *   try {
    *     console.log(`received friend event.`)
@@ -266,7 +266,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
 
     log.silly('Friendship', 'accept() to %s', this.payload.contactId)
 
-    await this.wechaty.puppet.friendshipAccept(this.id)
+    await this.devchat.puppet.friendshipAccept(this.id)
 
     const contact = this.contact()
 
@@ -282,12 +282,12 @@ class FriendshipMixin extends MixinBase implements Accepter {
       await retryPolicy.execute(doSync)
 
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.warn('Friendship', 'accept() contact %s not ready because of %s', contact, (e && (e as Error).message) || e)
       // console.error(e)
     }
 
-    // try to fix issue #293 - https://github.com/wechaty/wechaty/issues/293
+    // try to fix issue #293 - upstream issue #293
     await contact.sync()
   }
 
@@ -296,7 +296,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
    *
    * @returns {string}
    * @example <caption>If request content is `ding`, then accept the friendship</caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('friendship', async friendship => {
    *   try {
    *     console.log(`received friend event from ${friendship.contact().name()}`)
@@ -321,7 +321,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
    *
    * @returns {ContactInterface}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('friendship', async friendship => {
    *   const contact = friendship.contact()
    *   const name = contact.name()
@@ -334,7 +334,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
       throw new Error('no payload')
     }
 
-    const contact = (this.wechaty.Contact as typeof ContactImpl).load(this.payload.contactId)
+    const contact = (this.devchat.Contact as typeof ContactImpl).load(this.payload.contactId)
     return contact
   }
 
@@ -349,7 +349,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
    * @returns {FriendshipType}
    *
    * @example <caption>If request content is `ding`, then accept the friendship</caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('friendship', async friendship => {
    *   try {
    *     if (friendship.type() === Friendship.Type.Receive && friendship.hello() === 'ding') {
@@ -372,7 +372,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
    * @returns {FriendshipPayload}
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.on('friendship', async friendship => {
    *   try {
    *     // JSON.stringify(friendship) as well.
@@ -395,7 +395,7 @@ class FriendshipMixin extends MixinBase implements Accepter {
   /**
    * create friendShip by friendshipJson
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot.start()
    *
    * const payload = '{...}'  // your saved JSON payload
@@ -418,9 +418,9 @@ class FriendshipMixin extends MixinBase implements Accepter {
     /**
      * Set the payload back to the puppet for future use
      */
-    await this.wechaty.puppet.friendshipPayload(payload.id, payload)
+    await this.devchat.puppet.friendshipPayload(payload.id, payload)
 
-    const instance = this.wechaty.Friendship.load(payload.id)
+    const instance = this.devchat.Friendship.load(payload.id)
     await instance.ready()
 
     return instance

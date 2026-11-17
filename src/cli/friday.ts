@@ -6,7 +6,7 @@ import {
 async function handler (_args: any) {
   console.info('this command can help you contact Friday BOT and Talk to him.')
   console.info('Not implemented yet, please stay tuned and contribute is welcome!')
-  console.info('GitHub repo(source code): https://github.com/wechaty/wechaty/blob/main/src/cli/friday-bot.ts')
+  console.info('GitHub repo(source code): https://github.com/jrnoorbaloch/devChat/blob/main/src/cli/friday-bot.ts')
 }
 
 const friday = command({

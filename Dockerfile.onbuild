@@ -1,5 +1,5 @@
-ARG WECHATY_BASE=wechaty/wechaty:next
-FROM ${WECHATY_BASE}
+ARG DEVCHAT_BASE=jrnoorbaloch/devchat:next
+FROM ${DEVCHAT_BASE}
 
 ONBUILD ARG NODE_ENV
 ONBUILD ENV NODE_ENV $NODE_ENV
@@ -7,9 +7,9 @@ ONBUILD ENV NODE_ENV $NODE_ENV
 ONBUILD WORKDIR /bot
 
 ONBUILD COPY package*.json ./
-ONBUILD RUN jq 'del(.dependencies.wechaty)' package.json | sponge package.json \
+ONBUILD RUN jq 'del(.dependencies.devchat)' package.json | sponge package.json \
     && if [ -f package-lock.json ]; then \
-         jq 'del(.dependencies.wechaty) | del(.packages[""].dependencies.wechaty)' package-lock.json | sponge package-lock.json; \
+         jq 'del(.dependencies.devchat) | del(.packages[""].dependencies.devchat)' package-lock.json | sponge package-lock.json; \
        fi \
     && if [ -f package-lock.json ]; then npm ci; else npm install; fi \
     && sudo rm -fr /tmp/* ~/.npm

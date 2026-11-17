@@ -24,10 +24,10 @@ import type { Constructor } from 'clone-class'
 import type { ContactInterface } from './contact.ts'
 import { validationMixin } from '../user-mixins/validation.ts'
 import {
-  wechatifyMixinBase,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                       from '../user-mixins/devchatify.ts'
 
-class MomentMixin extends wechatifyMixinBase() {
+class MomentMixin extends devchatifyMixinBase() {
 
   static post () {
     // post new moment

@@ -1,6 +1,6 @@
 #
-# Wechaty Docker
-# https://github.com/wechaty/wechaty
+# devChat Docker
+# https://github.com/jrnoorbaloch/devChat
 #
 # FROM alpine
 #
@@ -29,8 +29,8 @@ RUN  apk update && apk upgrade \
       xvfb \
   && rm -rf /tmp/* /var/cache/apk/*
 
-RUN mkdir /wechaty
-WORKDIR /wechaty
+RUN mkdir /devchat
+WORKDIR /devchat
 
 # npm `chromedriver` not support alpine linux
 # https://github.com/giggio/node-chromedriver/issues/70
@@ -49,17 +49,17 @@ RUN  sed -i '/chromedriver/d' package.json \
   && mkdir /bot \
   \
   && (   mkdir /node_modules && cd /node_modules \
-      && ln -s /wechaty . \
-      && ln -s /wechaty/node_modules/* . \
+      && ln -s /devchat . \
+      && ln -s /devchat/node_modules/* . \
     ) \
-  && ln -s /wechaty/tsconfig.json / \
-  && echo "export * from 'wechaty'" > /index.ts \
+  && ln -s /devchat/tsconfig.json / \
+  && echo "export * from 'devchat'" > /index.ts \
   \
-  && echo 'Linked wechaty to global'
+  && echo 'Linked devchat to global'
 
 VOLUME [ "/bot" ]
 
-ENTRYPOINT [ "/wechaty/bin/entrypoint.sh" ]
+ENTRYPOINT [ "/devchat/bin/entrypoint.sh" ]
 CMD [ "" ]
 
 #
@@ -70,16 +70,16 @@ LABEL org.label-schema.license="ISC" \
       org.label-schema.build-date="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
       org.label-schema.version="$DOCKER_TAG" \
       org.label-schema.schema-version="$(devchat-version)" \
-      org.label-schema.name="Wechaty" \
+      org.label-schema.name="DevChat" \
       org.label-schema.description="Wechat for Bot" \
-      org.label-schema.usage="https://github.com/wechaty/wechaty/wiki/Docker" \
+      org.label-schema.usage="https://devchat-docs.vercel.app/configuration#docker" \
       org.label-schema.url="https://www.chatie.io" \
       org.label-schema.vendor="AKA Mobi" \
       org.label-schema.vcs-ref="$SOURCE_COMMIT" \
-      org.label-schema.vcs-url="https://github.com/wechaty/wechaty" \
-      org.label-schema.docker.cmd="docker run -ti --rm wechaty/wechaty <code.js>" \
-      org.label-schema.docker.cmd.test="docker run -ti --rm wechaty/wechaty test" \
-      org.label-schema.docker.cmd.help="docker run -ti --rm wechaty/wechaty help" \
-      org.label-schema.docker.params="WECHATY_TOKEN=token token from https://www.chatie.io"
+      org.label-schema.vcs-url="https://github.com/jrnoorbaloch/devChat" \
+      org.label-schema.docker.cmd="docker run -ti --rm jrnoorbaloch/devchat <code.js>" \
+      org.label-schema.docker.cmd.test="docker run -ti --rm jrnoorbaloch/devchat test" \
+      org.label-schema.docker.cmd.help="docker run -ti --rm jrnoorbaloch/devchat help" \
+      org.label-schema.docker.params="DEVCHAT_TOKEN=token puppet service token"
 
 #RUN npm test

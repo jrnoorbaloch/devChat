@@ -17,7 +17,7 @@ import type {
 }                   from './types.ts'
 
 async function sayableToPayload (sayable: Sayable): Promise<undefined | PUPPET.payloads.Sayable> {
-  log.verbose('Wechaty', 'sayableToPayload(%s)', sayable)
+  log.verbose('DevChat', 'sayableToPayload(%s)', sayable)
 
   if (typeof sayable === 'string') {
     return PUPPET.payloads.sayable.text(sayable)
@@ -44,7 +44,7 @@ async function sayableToPayload (sayable: Sayable): Promise<undefined | PUPPET.p
   } else if (UrlLinkImpl.validInstance(sayable)) {
     return PUPPET.payloads.sayable.url(sayable.payload)
   } else {
-    log.error('Wechaty', 'sayableToPayload() unsupported sayable: %s', sayable)
+    log.error('DevChat', 'sayableToPayload() unsupported sayable: %s', sayable)
     return undefined
   }
 }

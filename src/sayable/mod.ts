@@ -9,7 +9,7 @@ import {
   sayableToPayload,
 }                                     from './sayable-to-payload.ts'
 import {
-  payloadToSayableWechaty,
+  payloadToSayableDevChat,
 }                                     from './payload-to-sayable.ts'
 import {
   deliverSayableConversationPuppet,
@@ -22,6 +22,6 @@ export type {
 export {
   messageToSayable,
   sayableToPayload,
-  payloadToSayableWechaty,
+  payloadToSayableDevChat,
   deliverSayableConversationPuppet,
 }

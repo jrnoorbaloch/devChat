@@ -26,10 +26,10 @@ import { log } from '../config.ts'
 import { validationMixin } from '../user-mixins/validation.ts'
 
 import {
-  wechatifyMixinBase,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                       from '../user-mixins/devchatify.ts'
 
-class MiniProgramMixin extends wechatifyMixinBase() {
+class MiniProgramMixin extends devchatifyMixinBase() {
 
   public readonly payload: PUPPET.payloads.MiniProgram
 
@@ -64,8 +64,8 @@ class MiniProgramMixin extends wechatifyMixinBase() {
     super()
     this.payload = payload
     log.verbose('MiniProgram', 'constructor()')
-    // Huan(202110): it is ok to create a raw one without wechaty instance
-    // guardWechatifyClass.call(this, MiniProgram)
+    // Huan(202110): it is ok to create a raw one without devchat instance
+    // guardDevChatifyClass.call(this, MiniProgram)
   }
 
   appid (): undefined | string {

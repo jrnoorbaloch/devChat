@@ -1,7 +1,7 @@
 {
   "name": "devchat",
   "version": "2.0.0-alpha.18",
-  "description": "devChat is an open-source TypeScript chatbot SDK and RPA framework for developers. Build conversational bots for WeChat, WhatsApp, WeCom, Lark and more with one API, plus built-in command routing, auto-reply and rate limiting.",
+  "description": "devChat is an open-source TypeScript chatbot SDK for developers. Install with one command, choose WeChat, WhatsApp or both, and get slash commands, auto-reply and rate limiting built in.",
   "type": "module",
   "exports": {
     ".": {
@@ -35,7 +35,7 @@
     "node": ">=26",
     "npm": ">=10"
   },
-  "wechaty": {
+  "devchat": {
     "DEFAULT_PORT": 8080,
     "DEFAULT_PROTOCOL": "io|0.0.1",
     "DEFAULT_APIHOST": "api.chatie.io"
@@ -43,7 +43,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "node scripts/install-git-hooks.ts",
-    "changelog": "docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v \"$(pwd)\":/usr/local/src/your-app ferrarimarco/github-changelog-generator -u wechaty -p wechaty && sed -i'.bak' /greenkeeper/d CHANGELOG.md && sed -i'.bak' /Snyk/d CHANGELOG.md && sed -i'.bak' '/An in-range update of/d' CHANGELOG.md && node scripts/sort-contributiveness.ts < CHANGELOG.md > CHANGELOG.new.md 2>/dev/null && cat CHANGELOG.md >> CHANGELOG.new.md && mv CHANGELOG.new.md CHANGELOG.md",
+    "changelog": "docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v \"$(pwd)\":/usr/local/src/your-app ferrarimarco/github-changelog-generator -u devchat -p devchat && sed -i'.bak' /greenkeeper/d CHANGELOG.md && sed -i'.bak' /Snyk/d CHANGELOG.md && sed -i'.bak' '/An in-range update of/d' CHANGELOG.md && node scripts/sort-contributiveness.ts < CHANGELOG.md > CHANGELOG.new.md 2>/dev/null && cat CHANGELOG.md >> CHANGELOG.new.md && mv CHANGELOG.new.md CHANGELOG.md",
     "clean": "shx rm -fr dist/*",
     "coverage": "npm run coverage:node",
     "coverage:node": "node scripts/coverage.ts node",
@@ -61,7 +61,7 @@
     "lint": "npm run lint:biome && npm run lint:ts && npm run lint:sh && npm run lint:md",
     "puppet-install": "node bin/puppet-install.ts",
     "sloc": "sloc bin examples scripts src tests --details --format cli-table --keys total,source,comment && sloc bin examples scripts src tests",
-    "start": "npm run demo",
+    "start": "node bin/start.ts",
     "test:pack": "bash -x scripts/npm-pack-testing.sh",
     "test:shell": "shellcheck bin/*.sh scripts/*.sh",
     "test:unit": "node --test src scripts tests/unit",
@@ -72,7 +72,8 @@
     "test:e2e": "node --test --test-timeout=180000 tests/e2e",
     "test": "npm run lint && npm run test:unit",
     "typedoc": "bash scripts/typedoc.sh",
-    "demo:commands": "node examples/command-bot.ts"
+    "demo:commands": "node examples/command-bot.ts",
+    "setup": "node bin/init.ts"
   },
   "repository": {
     "type": "git",
@@ -83,7 +84,8 @@
     "devchat-doctor": "dist/esm/bin/doctor.js",
     "devchat-io-client": "dist/esm/bin/io-client.js",
     "devchat-puppet-install": "dist/esm/bin/puppet-install.js",
-    "devchat-version": "dist/esm/bin/version.js"
+    "devchat-version": "dist/esm/bin/version.js",
+    "devchat-init": "dist/esm/bin/init.js"
   },
   "keywords": [
     "devchat",
@@ -100,7 +102,6 @@
     "ai",
     "llm",
     "wechat",
-    "wechaty",
     "whatsapp",
     "wecom",
     "lark",
@@ -132,6 +133,7 @@
     "json-rpc-peer": "^0.17.0",
     "memory-card": "^1.1.2",
     "open-graph": "^0.2.6",
+    "qrcode-terminal": "^0.12.0",
     "rx-queue": "^1.0.5",
     "state-switch": "^1.6.3",
     "wechaty-puppet": "^1.20.1",
@@ -152,7 +154,6 @@
     "glob": "^7.2.0",
     "jsdoc-to-markdown": "^7.1.1",
     "markdownlint-cli": "^0.50.0",
-    "qrcode-terminal": "^0.12.0",
     "shx": "^0.3.4",
     "sloc": "^0.2.1",
     "tsx": "^4.23.15",
@@ -167,16 +168,5 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "contributors": [
-    {
-      "name": "Huan Li",
-      "email": "huan@chatie.io",
-      "url": "https://github.com/huan"
-    },
-    {
-      "name": "Wechaty Contributors",
-      "url": "https://github.com/wechaty/wechaty/graphs/contributors"
-    }
-  ]
+  }
 }

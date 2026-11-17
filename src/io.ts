@@ -28,7 +28,7 @@ import * as jsonRpcPeer from 'json-rpc-peer'
 import type {
   MessageInterface,
 }                     from './user-modules/mod.ts'
-import type { WechatyInterface } from './wechaty/mod.ts'
+import type { DevChatInterface } from './devchat/mod.ts'
 
 import {
   log,
@@ -41,7 +41,7 @@ import {
 }                   from './io-peer/io-peer.ts'
 
 export interface IoOptions {
-  wechaty      : WechatyInterface,
+  devchat      : DevChatInterface,
   token        : string,
   apihost?     : string,
   protocol?    : string,
@@ -126,9 +126,9 @@ export class Io {
     options.apihost   = options.apihost   || config.apihost
     options.protocol  = options.protocol  || config.default.DEFAULT_PROTOCOL
 
-    this.id = options.wechaty.id
+    this.id = options.devchat.id
 
-    this.protocol = options.protocol + '|' + options.wechaty.id + '|' + config.serviceIp + '|' + options.servicePort
+    this.protocol = options.protocol + '|' + options.devchat.id + '|' + config.serviceIp + '|' + options.servicePort
     log.verbose('Io', 'instantiated with apihost[%s], token[%s], protocol[%s], cuid[%s]',
       options.apihost,
       options.token,
@@ -166,8 +166,8 @@ export class Io {
 
       this.ws = await this.initWebSocket()
 
-      this.options.wechaty.on('login', () => { this.scanPayload = undefined })
-      this.options.wechaty.on('scan', (qrcode, status) => {
+      this.options.devchat.on('login', () => { this.scanPayload = undefined })
+      this.options.devchat.on('scan', (qrcode, status) => {
         this.scanPayload = {
           ...this.scanPayload,
           qrcode,
@@ -194,17 +194,17 @@ export class Io {
 
   private initEventHook () {
     log.verbose('Io', 'initEventHook()')
-    const wechaty = this.options.wechaty
+    const devchat = this.options.devchat
 
-    wechaty.on('error',     error =>        this.send({ name: 'error',      payload: error }))
-    wechaty.on('heartbeat', data  =>        this.send({ name: 'heartbeat',  payload: { cuid: this.id, data } }))
-    wechaty.on('login',     user =>         this.send({ name: 'login',      payload: wechaty.puppet.contactPayload(user.id) }))
-    wechaty.on('logout',    user =>         this.send({ name: 'logout',     payload: wechaty.puppet.contactPayload(user.id) }))
-    wechaty.on('message',   message =>      this.ioMessage(message))
+    devchat.on('error',     error =>        this.send({ name: 'error',      payload: error }))
+    devchat.on('heartbeat', data  =>        this.send({ name: 'heartbeat',  payload: { cuid: this.id, data } }))
+    devchat.on('login',     user =>         this.send({ name: 'login',      payload: devchat.puppet.contactPayload(user.id) }))
+    devchat.on('logout',    user =>         this.send({ name: 'logout',     payload: devchat.puppet.contactPayload(user.id) }))
+    devchat.on('message',   message =>      this.ioMessage(message))
 
     // FIXME: payload schema need to be defined universal
-    // wechaty.on('scan',      (url, code) =>  this.send({ name: 'scan',       payload: { url, code } }))
-    wechaty.on('scan',      (qrcode, status) =>  this.send({ name: 'scan',  payload: { qrcode, status } } as IoEventScan))
+    // devchat.on('scan',      (url, code) =>  this.send({ name: 'scan',       payload: { url, code } }))
+    devchat.on('scan',      (qrcode, status) =>  this.send({ name: 'scan',  payload: { qrcode, status } } as IoEventScan))
   }
 
   private async initWebSocket (): Promise<WebSocket> {
@@ -257,7 +257,7 @@ export class Io {
     this.reconnectTimeout = undefined
 
     const name    = 'sys'
-    const payload = 'Wechaty version ' + this.options.wechaty.version() + ` with CUID: ${this.id}`
+    const payload = 'DevChat version ' + this.options.devchat.version() + ` with CUID: ${this.id}`
 
     const initEvent: IoEvent = {
       name,
@@ -314,20 +314,20 @@ export class Io {
             }
           } catch (e) {
             log.warn('Io', 'server pushed function exception: %s', e)
-            this.options.wechaty.emitError(e)
+            this.options.devchat.emitError(e)
           }
         }
         break
 
       case 'reset':
         log.verbose('Io', 'on(reset): %s', ioEvent.payload)
-        this.options.wechaty.emitError(
+        this.options.devchat.emitError(
           new Error(
             'reset by server: '
             + JSON.stringify(ioEvent.payload),
           ),
         )
-        await this.options.wechaty.reset()
+        await this.options.devchat.reset()
         break
 
       case 'shutdown':
@@ -339,12 +339,12 @@ export class Io {
       case 'update':
         log.verbose('Io', 'on(update): %s', ioEvent.payload)
         {
-          const wechaty = this.options.wechaty
-          if (wechaty.isLoggedIn) {
+          const devchat = this.options.devchat
+          if (devchat.isLoggedIn) {
             const loginEvent: IoEvent = {
               name    : 'login',
-              payload : await wechaty.puppet.contactPayload(
-                wechaty.puppet.currentUserId,
+              payload : await devchat.puppet.contactPayload(
+                devchat.puppet.currentUserId,
               ),
             }
             await this.send(loginEvent)
@@ -367,7 +367,7 @@ export class Io {
 
       case 'logout':
         log.info('Io', 'on(logout): %s', ioEvent.payload)
-        await this.options.wechaty.logout()
+        await this.options.devchat.logout()
         break
 
       case 'jsonrpc':
@@ -434,7 +434,7 @@ export class Io {
       return
     }
 
-    this.options.wechaty.emitError(e)
+    this.options.devchat.emitError(e)
 
     // when `error`, there must have already a `close` event
     // we should not call this.reconnect() again
@@ -581,7 +581,7 @@ export class Io {
 
     const messageEvent: IoEvent = {
       name    : 'message',
-      payload : await m.wechaty.puppet.messagePayload(m.id),
+      payload : await m.devchat.puppet.messagePayload(m.id),
     }
     await this.send(messageEvent)
   }

@@ -1,0 +1,93 @@
+import { log }  from 'wechaty-puppet'
+
+import { VERSION }  from '../config.ts'
+
+import type { DevChatSkeleton }   from '../devchat/mod.ts'
+
+import type { GErrorMixin }       from './gerror-mixin.ts'
+import type { PuppetMixin }       from './puppet-mixin.ts'
+
+const miscMixin = <MixinBase extends typeof DevChatSkeleton & PuppetMixin & GErrorMixin> (mixinBase: MixinBase) => {
+  log.verbose('DevChatMiscMixin', 'miscMixin(%s)', mixinBase.name)
+
+  abstract class MiscMixin extends mixinBase {
+
+    constructor (...args: any[]) {
+      super(...args)
+    }
+
+    /**
+     * @ignore
+     */
+    override toString () {
+      if (Object.keys(this.__options).length <= 0) {
+        return this.constructor.name
+      }
+
+      return [
+        'DevChat#',
+        this.id,
+        `<${(this.__options.puppet) || ''}>`,
+        `(${(this.__memory && this.__memory.name) || ''})`,
+      ].join('')
+    }
+
+    /**
+     * DevChat bot name set by `options.name`
+     * default: `devchat`
+     */
+    name () {
+      return this.__options.name || 'devchat'
+    }
+
+    /**
+     * @ignore
+     * Return version of DevChat
+     *
+     * @returns {string}                  - the version number
+     * @example
+     * console.log(DevChat.instance().version())       // return '#git[af39df]'
+     * console.log(DevChat.instance().version(true))   // return '0.7.9'
+     */
+    version (): string {
+      return VERSION
+    }
+
+    /**
+     * @ignore
+     */
+    async sleep (milliseconds: number): Promise<void> {
+      await new Promise<void>(resolve =>
+        setTimeout(resolve, milliseconds),
+      )
+    }
+
+    /**
+     * @private
+     */
+    ding (data?: string): void {
+      log.silly('DevChatMiscMixin', 'ding(%s)', data || '')
+
+      try {
+        this.puppet.ding(data)
+      } catch (e) {
+        this.emitError(e)
+      }
+    }
+
+  }
+
+  return MiscMixin
+}
+
+type MiscMixin = ReturnType<typeof miscMixin>
+
+type ProtectedPropertyMiscMixin = never
+
+export type {
+  MiscMixin,
+  ProtectedPropertyMiscMixin,
+}
+export {
+  miscMixin,
+}

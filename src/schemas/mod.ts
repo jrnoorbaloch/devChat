@@ -7,10 +7,10 @@ import {
   type RoomEventListeners,
 }                           from './room-events.ts'
 import {
-  WechatyEventEmitter,
-  type WechatyEventListeners,
-  type WechatyEventName,
-}                           from './wechaty-events.ts'
+  DevChatEventEmitter,
+  type DevChatEventListeners,
+  type DevChatEventName,
+}                           from './devchat-events.ts'
 import type {
   Accepter,
 }                           from './acceptable.ts'
@@ -19,11 +19,11 @@ export type {
   Accepter,
   ContactEventListeners,
   RoomEventListeners,
-  WechatyEventListeners,
-  WechatyEventName,
+  DevChatEventListeners,
+  DevChatEventName,
 }
 export {
   ContactEventEmitter,
   RoomEventEmitter,
-  WechatyEventEmitter,
+  DevChatEventEmitter,
 }

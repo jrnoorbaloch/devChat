@@ -1,22 +1,25 @@
 <!-- title: FAQ -->
-<!-- description: Frequently asked questions about devChat: supported messengers, Node.js versions, account safety, testing bots without a real account, and contributing. -->
+<!-- description: Frequently asked questions about devChat: supported messengers, running WeChat and WhatsApp together, Node.js versions, account safety and testing bots without a phone. -->
 <!-- order: 6 -->
 <h1>Frequently asked questions</h1>
 
 <h2 id="what">What is devChat?</h2>
-<p>devChat is an open-source chatbot SDK for TypeScript and Node.js. It gives you one API for many messengers, plus built-in command routing, auto-replies and rate limiting. It is a fork of Wechaty.</p>
+<p>devChat is an open-source chatbot SDK for TypeScript and Node.js. It gives you one API for several messengers, plus built-in commands, auto-replies and rate limiting.</p>
 
 <h2 id="messengers">Which messengers are supported?</h2>
-<p>Any messenger with a Wechaty puppet provider, including WeChat, WhatsApp, WeCom, Lark/Feishu, QQ and Gitter. See <a href="/configuration#puppets">Puppet providers</a>.</p>
+<p><code>npm run setup</code> sets up <strong>WeChat</strong> and <strong>WhatsApp</strong>. Other drivers, such as remote puppet services, can be selected with <code>DEVCHAT_PUPPET</code>.</p>
+
+<h2 id="both">Can one bot run on WeChat and WhatsApp at the same time?</h2>
+<p>Yes. Choose "Both" in setup. <code>startDevChat()</code> starts one bot per messenger and runs your same <code>setup</code> code on each. If one messenger fails, the other keeps running.</p>
 
 <h2 id="node">Which Node.js version do I need?</h2>
-<p>Node.js 26 or newer, with npm 10 or newer. devChat runs its <code>.ts</code> sources directly on Node.js.</p>
+<p>Node.js 26 or newer, with npm 10 or newer. The installer checks this and helps you install it.</p>
 
 <h2 id="ban">Can my account get banned?</h2>
-<p>Unofficial protocols carry risk. Reduce it by using rate limits (<code>rateLimit</code> in both plugins), by not mass-messaging people, and by using an official or paid puppet for production.</p>
+<p>Yes, it is possible. WhatsApp support uses WhatsApp Web, not the official WhatsApp Business API, and WeChat support uses the web protocol. Both messengers may restrict automated accounts. Use a separate test number, keep the built-in rate limits on, and never mass-message people.</p>
 
-<h2 id="testing">How do I test a bot without a real account?</h2>
-<p>Use <code>wechaty-puppet-mock</code>. devChat's own plugin tests drive a real bot this way:</p>
+<h2 id="testing">How do I test a bot without a phone?</h2>
+<p>Use the mock driver that devChat's own tests use:</p>
 <pre><code>import { PuppetMock } from 'wechaty-puppet-mock'
 
 const puppet = new PuppetMock()

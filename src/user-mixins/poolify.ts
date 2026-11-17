@@ -43,7 +43,7 @@ const poolifyMixin = <MixinBase extends Constructor>(mixinBase: MixinBase) => <T
     /**
      * Nan(202111): We use it as a workaround to meet the requirement of Constructor parameters
      *
-     * See: https://github.com/wechaty/wechaty/issues/2553
+     * See: upstream issue #2553
      */
     public static load<L extends Constructor<T & {}> & PoolifyMixin<T>> (
       this : L,

@@ -40,7 +40,7 @@ import {
 import { RoomEventEmitter }             from '../schemas/mod.ts'
 import {
   poolifyMixin,
-  wechatifyMixin,
+  devchatifyMixin,
   validationMixin,
 }                                       from '../user-mixins/mod.ts'
 import {
@@ -60,7 +60,7 @@ import type {
   MessageInterface,
 }                       from './message.ts'
 
-const MixinBase = wechatifyMixin(
+const MixinBase = devchatifyMixin(
   poolifyMixin(
     RoomEventEmitter,
   )<RoomImplInterface>(),
@@ -69,7 +69,7 @@ const MixinBase = wechatifyMixin(
 /**
  * All WeChat rooms(groups) will be encapsulated as a Room.
  *
- * [Examples/Room-Bot]{@link https://github.com/wechaty/wechaty/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/room-bot.ts}
+ * [Examples/Room-Bot]{@link https://github.com/jrnoorbaloch/devChat/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/room-bot.ts}
  *
  */
 class RoomMixin extends MixinBase implements SayableSayer {
@@ -105,11 +105,11 @@ class RoomMixin extends MixinBase implements SayableSayer {
 
     try {
       const contactIdList = contactList.map(contact => contact.id)
-      const roomId = await this.wechaty.puppet.roomCreate(contactIdList, topic)
+      const roomId = await this.devchat.puppet.roomCreate(contactIdList, topic)
       const room = this.load(roomId)
       return room
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.error('Room', 'create() exception: %s', (e && (e as Error).stack) || (e as Error).message || (e as Error))
       throw e
     }
@@ -134,11 +134,11 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @param {RoomQueryFilter} [query]
    * @returns {Promise<RoomInterface[]>}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in
    * const roomList = await bot.Room.findAll()                    // get the room list of the bot
-   * const roomList = await bot.Room.findAll({topic: 'wechaty'})  // find all of the rooms with name 'wechaty'
+   * const roomList = await bot.Room.findAll({topic: 'devchat'})  // find all of the rooms with name 'devchat'
    */
   static async findAll (
     query? : PUPPET.filters.Room,
@@ -146,11 +146,11 @@ class RoomMixin extends MixinBase implements SayableSayer {
     log.verbose('Room', 'findAll(%s)', JSON.stringify(query, stringifyFilter) || '')
 
     try {
-      const roomIdList = await this.wechaty.puppet.roomSearch(query)
+      const roomIdList = await this.devchat.puppet.roomSearch(query)
 
       const idToRoom = async (id: string) =>
-        this.wechaty.Room.find({ id })
-          .catch(e => this.wechaty.emitError(e))
+        this.devchat.Room.find({ id })
+          .catch(e => this.devchat.emitError(e))
 
       /**
        * we need to use concurrencyExecuter to reduce the parallel number of the requests
@@ -169,7 +169,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
       return roomList
 
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.verbose('Room', 'findAll() rejected: %s', (e as Error).message)
       return [] as RoomInterface[] // fail safe
     }
@@ -186,11 +186,11 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @param {RoomQueryFilter} query
    * @returns {Promise<undefined | RoomInterface>} If can find the room, return Room, or return null
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const roomList = await bot.Room.find()
-   * const roomList = await bot.Room.find({topic: 'wechaty'})
+   * const roomList = await bot.Room.find({topic: 'devchat'})
    */
 
   static async find (
@@ -203,11 +203,11 @@ class RoomMixin extends MixinBase implements SayableSayer {
     }
 
     if (query.id) {
-      const room = (this.wechaty.Room as any as typeof RoomImpl).load(query.id)
+      const room = (this.devchat.Room as any as typeof RoomImpl).load(query.id)
       try {
         await room.ready()
       } catch (e) {
-        this.wechaty.emitError(e)
+        this.devchat.emitError(e)
         return undefined
       }
 
@@ -228,9 +228,9 @@ class RoomMixin extends MixinBase implements SayableSayer {
 
     for (const [ idx, room ] of roomList.entries()) {
       // use puppet.roomValidate() to confirm double confirm that this roomId is valid.
-      // https://github.com/wechaty/wechaty-puppet-padchat/issues/64
-      // https://github.com/wechaty/wechaty/issues/1345
-      const valid = await this.wechaty.puppet.roomValidate(room.id)
+      // upstream wechaty-puppet-padchat issue #64
+      // upstream issue #1345
+      const valid = await this.devchat.puppet.roomValidate(room.id)
       if (valid) {
         log.verbose('Room', 'find() room<id=%s> is valid: return it', idx, room.id)
         return room
@@ -255,7 +255,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
   /**
    * @hideconstructor
    * @property {string}  id - Room id.
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    */
   constructor (
     id: string,
@@ -285,7 +285,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
 
   /**
    * Proposal: add a handle field to RoomPayload #181
-   *  @link https://github.com/wechaty/puppet/issues/181
+   *  @link upstream puppet issue #181
    */
   handle (): undefined | string {
     return this.payload?.handle
@@ -299,8 +299,8 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * await room.sync()
    */
   async sync (): Promise<void> {
-    await this.wechaty.puppet.roomPayloadDirty(this.id)
-    await this.wechaty.puppet.roomMemberPayloadDirty(this.id)
+    await this.devchat.puppet.roomPayloadDirty(this.id)
+    await this.devchat.puppet.roomMemberPayloadDirty(this.id)
     await this.ready(true)
   }
 
@@ -321,18 +321,18 @@ class RoomMixin extends MixinBase implements SayableSayer {
       return
     }
 
-    this.payload = await this.wechaty.puppet.roomPayload(this.id)
+    this.payload = await this.devchat.puppet.roomPayload(this.id)
 
     /**
      * Sync all room member contacts
      */
-    const memberIdList = await this.wechaty.puppet.roomMemberList(this.id)
+    const memberIdList = await this.devchat.puppet.roomMemberList(this.id)
 
     const doReady = async (id: string): Promise<void> => {
       try {
-        await this.wechaty.Contact.find({ id })
+        await this.devchat.Contact.find({ id })
       } catch (e) {
-        this.wechaty.emitError(e)
+        this.devchat.emitError(e)
       }
     }
 
@@ -363,9 +363,9 @@ class RoomMixin extends MixinBase implements SayableSayer {
   // public say (...args: never[]): never
 
   /**
-   * Send message inside Room, if set [replyTo], wechaty will mention the contact as well.
+   * Send message inside Room, if set [replyTo], devchat will mention the contact as well.
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @param {(string | ContactInterface | FileBox)} textOrContactOrFileOrUrlOrMini - Send `text` or `media file` inside Room. <br>
    * You can use {@link https://www.npmjs.com/package/file-box|FileBox} to send file
@@ -373,10 +373,10 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @returns {Promise<void | MessageInterface>}
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
-   * const room = await bot.Room.find({topic: 'wechaty'})
+   * const room = await bot.Room.find({topic: 'devchat'})
    *
    * // 1. Send text inside Room
    *
@@ -385,7 +385,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    *
    * // 2. Send media file inside Room
    * import { FileBox }  from 'file-box'
-   * const fileBox1 = FileBox.fromUrl('https://wechaty.github.io/wechaty/images/bot-qr-code.png')
+   * const fileBox1 = FileBox.fromUrl('https://devchat-docs.vercel.app/assets/og.png')
    * const fileBox2 = FileBox.fromLocal('/tmp/text.txt')
    * await room.say(fileBox1)
    * const msg1 = await room.say(fileBox1) // only supported by puppet-padplus
@@ -412,8 +412,8 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * const urlLink = new UrlLink ({
    *   description : 'WeChat Bot SDK for Individual Account, Powered by TypeScript, Docker, and Love',
    *   thumbnailUrl: 'https://avatars0.githubusercontent.com/u/25162437?s=200&v=4',
-   *   title       : 'Welcome to Wechaty',
-   *   url         : 'https://github.com/wechaty/wechaty',
+   *   title       : 'Welcome to DevChat',
+   *   url         : 'https://github.com/jrnoorbaloch/devChat',
    * })
    * await room.say(urlLink)
    * const msg = await room.say(urlLink) // only supported by puppet-padplus
@@ -488,17 +488,17 @@ class RoomMixin extends MixinBase implements SayableSayer {
       //   contactId : (mentionList.length && mentionList[0].id) || undefined,
       //   roomId    : this.id,
       // }
-      msgId = await this.wechaty.puppet.messageSendText(
+      msgId = await this.devchat.puppet.messageSendText(
         this.id,
         text,
         mentionList.map(c => c.id),
       )
     } else {
-      msgId = await deliverSayableConversationPuppet(this.wechaty.puppet)(this.id)(sayable)
+      msgId = await deliverSayableConversationPuppet(this.devchat.puppet)(this.id)(sayable)
     }
 
     if (msgId) {
-      const msg = await this.wechaty.Message.find({ id: msgId })
+      const msg = await this.devchat.Message.find({ id: msgId })
       return msg
     }
   }
@@ -517,21 +517,21 @@ class RoomMixin extends MixinBase implements SayableSayer {
       /**
        * No mention in the string
        */
-      return this.wechaty.puppet.messageSendText(
+      return this.devchat.puppet.messageSendText(
         this.id,
         textList[0]!,
       )
     // TODO(huan) 20191222 it seems the following code will not happen,
     //            because it's equal the mentionList.length === 0 situation?
     //
-    // XXX(huan) 20200101: See issue https://github.com/wechaty/wechaty/issues/1893
+    // XXX(huan) 20200101: See issue upstream issue #1893
     //           This is an anti-pattern usage.
     //
     // } else if (textList.length === 1) {
     //   /**
     //    * Constructed mention string, skip inserting @ signs
     //    */
-    //   return this.wechaty.puppet.messageSendText(
+    //   return this.devchat.puppet.messageSendText(
     //     receiver,
     //     textList[0],
     //     mentionList.map(c => c.id),
@@ -559,7 +559,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
       }
       finalText += textList[i]
 
-      return this.wechaty.puppet.messageSendText(
+      return this.devchat.puppet.messageSendText(
         this.id,
         finalText,
         mentionList.map(c => c.id),
@@ -586,12 +586,12 @@ class RoomMixin extends MixinBase implements SayableSayer {
 
   /**
    * @listens Room
-   * @param   {RoomEventName}      event      - Emit WechatyEvent
-   * @param   {RoomEventFunction}  listener   - Depends on the WechatyEvent
+   * @param   {RoomEventName}      event      - Emit DevChatEvent
+   * @param   {RoomEventFunction}  listener   - Depends on the DevChatEvent
    * @return  {this}                          - this for chain
    *
    * @example <caption>Event:join </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -603,7 +603,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * }
    *
    * @example <caption>Event:leave </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -615,7 +615,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * }
    *
    * @example <caption>Event:message </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -626,7 +626,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * }
    *
    * @example <caption>Event:topic </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -637,7 +637,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * }
    *
    * @example <caption>Event:invite </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -657,14 +657,14 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * Add contact in a room
    *
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    * >
-   * > see {@link https://github.com/wechaty/wechaty/issues/1441|Web version of WeChat closed group interface}
+   * > see {@link upstream issue #1441|Web version of WeChat closed group interface}
    *
    * @param {ContactInterface} contact
    * @returns {Promise<void>}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const contact = await bot.Contact.find({name: 'lijiarui'}) // change 'lijiarui' to any contact in your WeChat
@@ -679,7 +679,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    */
   async add (contact: ContactInterface): Promise<void> {
     log.verbose('Room', 'add(%s)', contact)
-    await this.wechaty.puppet.roomAdd(this.id, contact.id)
+    await this.devchat.puppet.roomAdd(this.id, contact.id)
   }
 
   /**
@@ -687,14 +687,14 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * It works only when the bot is the owner of the room
    *
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    * >
-   * > see {@link https://github.com/wechaty/wechaty/issues/1441|Web version of WeChat closed group interface}
+   * > see {@link upstream issue #1441|Web version of WeChat closed group interface}
    *
    * @param {ContactInterface} contact
    * @returns {Promise<void>}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'WeChat'})          // change 'WeChat' to any room topic in your WeChat
@@ -709,7 +709,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    */
   async remove (contact: ContactInterface): Promise<void> {
     log.verbose('Room', 'del(%s)', contact)
-    await this.wechaty.puppet.roomDel(this.id, contact.id)
+    await this.devchat.puppet.roomDel(this.id, contact.id)
     // this.delLocal(contact)
   }
 
@@ -740,7 +740,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * Bot quit the room itself
    *
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @returns {Promise<void>}
    * @example
@@ -748,7 +748,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    */
   async quit (): Promise<void> {
     log.verbose('Room', 'quit() %s', this)
-    await this.wechaty.puppet.roomQuit(this.id)
+    await this.devchat.puppet.roomQuit(this.id)
   }
 
   async topic ()                : Promise<string>
@@ -761,7 +761,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @returns {Promise<string | void>}
    *
    * @example <caption>When you say anything in a room, it will get room topic. </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   const room = m.room()
@@ -773,13 +773,13 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * .start()
    *
    * @example <caption>When you say anything in a room, it will change room topic. </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   const room = m.room()
    *   if (room) {
    *     const oldTopic = await room.topic()
-   *     await room.topic('change topic to wechaty!')
+   *     await room.topic('change topic to devchat!')
    *     console.log(`room topic change from ${oldTopic} to ${room.topic()}`)
    *   }
    * })
@@ -796,10 +796,10 @@ class RoomMixin extends MixinBase implements SayableSayer {
       if (this.payload && this.payload.topic) {
         return this.payload.topic
       } else {
-        const memberIdList = await this.wechaty.puppet.roomMemberList(this.id)
+        const memberIdList = await this.devchat.puppet.roomMemberList(this.id)
         const memberListFuture = memberIdList
-          .filter(id => id !== this.wechaty.puppet.currentUserId)
-          .map(id => this.wechaty.Contact.find({ id }))
+          .filter(id => id !== this.devchat.puppet.currentUserId)
+          .map(id => this.devchat.Contact.find({ id }))
 
         const memberList = (await Promise.all(memberListFuture))
           .filter(Boolean) as ContactInterface[]
@@ -812,7 +812,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
       }
     }
 
-    const future = this.wechaty.puppet
+    const future = this.devchat.puppet
       .roomTopic(this.id, newTopic)
       .catch(e => {
         log.warn('Room', 'topic(newTopic=%s) exception: %s',
@@ -830,13 +830,13 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * SET/GET announce from the room
    * > Tips: It only works when bot is the owner of the room.
    * >
-   * > This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * > This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @param {string} [text] If set this para, it will change room announce.
    * @returns {(Promise<void | string>)}
    *
    * @example <caption>When you say anything in a room, it will get room announce. </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'your room'})
@@ -844,12 +844,12 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * console.log(`room announce is : ${announce}`)
    *
    * @example <caption>When you say anything in a room, it will change room announce. </caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const room = await bot.Room.find({topic: 'your room'})
    * const oldAnnounce = await room.announce()
-   * await room.announce('change announce to wechaty!')
+   * await room.announce('change announce to devchat!')
    * console.log(`room announce change from ${oldAnnounce} to ${room.announce()}`)
    */
   async announce (text?: string): Promise<void | string> {
@@ -860,23 +860,23 @@ class RoomMixin extends MixinBase implements SayableSayer {
     )
 
     if (typeof text === 'undefined') {
-      const announcement = await this.wechaty.puppet.roomAnnounce(this.id)
+      const announcement = await this.devchat.puppet.roomAnnounce(this.id)
       return announcement
     } else {
-      await this.wechaty.puppet.roomAnnounce(this.id, text)
+      await this.devchat.puppet.roomAnnounce(this.id, text)
     }
   }
 
   /**
    * Get QR Code Value of the Room from the room, which can be used as scan and join the room.
    * > Tips:
-   * 1. This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * 1. This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    * 2. The return should be the QR Code Data, instead of the QR Code Image. (the data should be less than 8KB. See: https://stackoverflow.com/a/12764370/1123955 )
    * @returns {Promise<string>}
    */
   async qrCode (): Promise<string> {
     log.verbose('Room', 'qrCode()')
-    const qrcodeValue = await this.wechaty.puppet.roomQRCode(this.id)
+    const qrcodeValue = await this.devchat.puppet.roomQRCode(this.id)
     return guardQrCodeValue(qrcodeValue)
   }
 
@@ -885,7 +885,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @param {ContactInterface} contact
    * @returns {Promise<string | null>} - If a contact has an alias in room, return string, otherwise return null
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   const room = m.room()
@@ -898,7 +898,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * .start()
    */
   async alias (contact: ContactInterface): Promise<undefined | string> {
-    const memberPayload = await this.wechaty.puppet.roomMemberPayload(this.id, contact.id)
+    const memberPayload = await this.devchat.puppet.roomMemberPayload(this.id, contact.id)
 
     if (memberPayload.roomAlias) {
       return memberPayload.roomAlias
@@ -915,19 +915,19 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @param { undefined | boolean } hasRead
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * const room = await bot.Room.find({topic: 'xxx'})
    * await room.readMark()
    */
   async readMark (hasRead?: boolean): Promise<void | boolean> {
     try {
       if (typeof hasRead === 'undefined') {
-        return this.wechaty.puppet.conversationReadMark(this.id)
+        return this.devchat.puppet.conversationReadMark(this.id)
       } else {
-        await this.wechaty.puppet.conversationReadMark(this.id, hasRead)
+        await this.devchat.puppet.conversationReadMark(this.id, hasRead)
       }
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.error('Room', 'readMark() exception: %s', (e as Error).message)
     }
   }
@@ -937,22 +937,22 @@ class RoomMixin extends MixinBase implements SayableSayer {
    *
    * @param {ContactInterface} contact
    * @returns {Promise<boolean>} Return `true` if has contact, else return `false`.
-   * @example <caption>Check whether 'lijiarui' is in the room 'wechaty'</caption>
-   * const bot = WechatyBuilder.build()
+   * @example <caption>Check whether 'lijiarui' is in the room 'devchat'</caption>
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
    * const contact = await bot.Contact.find({name: 'lijiarui'})   // change 'lijiarui' to any of contact in your WeChat
-   * const room = await bot.Room.find({topic: 'wechaty'})         // change 'wechaty' to any of the room in your WeChat
+   * const room = await bot.Room.find({topic: 'devchat'})         // change 'devchat' to any of the room in your WeChat
    * if (contact && room) {
    *   if (await room.has(contact)) {
-   *     console.log(`${contact.name()} is in the room wechaty!`)
+   *     console.log(`${contact.name()} is in the room devchat!`)
    *   } else {
-   *     console.log(`${contact.name()} is not in the room wechaty!`)
+   *     console.log(`${contact.name()} is not in the room devchat!`)
    *   }
    * }
    */
   async has (contact: ContactInterface): Promise<boolean> {
-    const memberIdList = await this.wechaty.puppet.roomMemberList(this.id)
+    const memberIdList = await this.devchat.puppet.roomMemberList(this.id)
 
     // if (!memberIdList) {
     //   return false
@@ -974,7 +974,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @property   {string} name            -Find the contact by WeChat name in a room, equal to `Contact.name()`.
    * @property   {string} roomAlias       -Find the contact by alias set by the bot for others in a room.
    * @property   {string} contactAlias    -Find the contact by alias set by the contact out of a room, equal to `Contact.alias()`.
-   * [More Detail]{@link https://github.com/wechaty/wechaty/issues/365}
+   * [More Detail]{@link upstream issue #365}
    */
 
   /**
@@ -1004,9 +1004,9 @@ class RoomMixin extends MixinBase implements SayableSayer {
       return this.memberList()
     }
 
-    const contactIdList   = await this.wechaty.puppet.roomMemberSearch(this.id, query)
+    const contactIdList   = await this.devchat.puppet.roomMemberSearch(this.id, query)
     const contactListAll  = await Promise.all(
-      contactIdList.map(id => this.wechaty.Contact.find({ id })),
+      contactIdList.map(id => this.devchat.Contact.find({ id })),
     )
 
     const contactList = contactListAll.filter(c => !!c) as ContactInterface[]
@@ -1023,24 +1023,24 @@ class RoomMixin extends MixinBase implements SayableSayer {
    * @returns {Promise<undefined | ContactInterface>}
    *
    * @example <caption>Find member by name</caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
-   * const room = await bot.Room.find({topic: 'wechaty'})           // change 'wechaty' to any room name in your WeChat
+   * const room = await bot.Room.find({topic: 'devchat'})           // change 'devchat' to any room name in your WeChat
    * if (room) {
    *   const member = await room.member('lijiarui')             // change 'lijiarui' to any room member in your WeChat
    *   if (member) {load
    * @example <caption>Find member by MemberQueryFilter</caption>
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.start()
    * // after logged in...
-   * const room = await bot.Room.find({topic: 'wechaty'})          // change 'wechaty' to any room name in your WeChat
+   * const room = await bot.Room.find({topic: 'devchat'})          // change 'devchat' to any room name in your WeChat
    * if (room) {
    *   const member = await room.member({name: 'lijiarui'})        // change 'lijiarui' to any room member in your WeChat
    *   if (member) {
-   *     console.log(`wechaty room got the member: ${member.name()}`)
+   *     console.log(`devchat room got the member: ${member.name()}`)
    *   } else {
-   *     console.log(`cannot get member in wechaty room!`)
+   *     console.log(`cannot get member in devchat room!`)
    *   }
    * }
    */
@@ -1082,7 +1082,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
   protected async memberList (): Promise<ContactInterface[]> {
     log.verbose('Room', 'memberList()')
 
-    const memberIdList = await this.wechaty.puppet.roomMemberList(this.id)
+    const memberIdList = await this.devchat.puppet.roomMemberList(this.id)
 
     // if (!memberIdList) {
     //   log.warn('Room', 'memberList() not ready')
@@ -1091,7 +1091,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
 
     const contactListAll = await Promise.all(
       memberIdList.map(
-        id => this.wechaty.Contact.find({ id }),
+        id => this.devchat.Contact.find({ id }),
       ),
     )
 
@@ -1102,7 +1102,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
   /**
    * Get room's owner from the room.
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    * @returns {(ContactInterface | undefined)}
    * @example
    * const owner = room.owner()
@@ -1115,7 +1115,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
       return undefined
     }
 
-    const owner = (this.wechaty.Contact as typeof ContactImpl).load(ownerId)
+    const owner = (this.devchat.Contact as typeof ContactImpl).load(ownerId)
     return owner
   }
 
@@ -1130,7 +1130,7 @@ class RoomMixin extends MixinBase implements SayableSayer {
   async avatar (): Promise<FileBoxInterface> {
     log.verbose('Room', 'avatar()')
 
-    return this.wechaty.puppet.roomAvatar(this.id)
+    return this.devchat.puppet.roomAvatar(this.id)
   }
 
 }

@@ -36,12 +36,12 @@ export type RoomEventName = keyof typeof ROOM_EVENT_DICT
 
 /**
  * @listens Room
- * @param   {RoomEventName}      event      - Emit WechatyEvent
- * @param   {RoomEventFunction}  listener   - Depends on the WechatyEvent
+ * @param   {RoomEventName}      event      - Emit DevChatEvent
+ * @param   {RoomEventFunction}  listener   - Depends on the DevChatEvent
  * @return  {this}                          - this for chain
  *
  * @example <caption>Event:join </caption>
- * const bot = WechatyBuilder.build()
+ * const bot = DevChatBuilder.build()
  * await bot.start()
  * // after logged in...
  * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -53,7 +53,7 @@ export type RoomEventName = keyof typeof ROOM_EVENT_DICT
  * }
  *
  * @example <caption>Event:leave </caption>
- * const bot = WechatyBuilder.build()
+ * const bot = DevChatBuilder.build()
  * await bot.start()
  * // after logged in...
  * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -65,7 +65,7 @@ export type RoomEventName = keyof typeof ROOM_EVENT_DICT
  * }
  *
  * @example <caption>Event:message </caption>
- * const bot = WechatyBuilder.build()
+ * const bot = DevChatBuilder.build()
  * await bot.start()
  * // after logged in...
  * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -76,7 +76,7 @@ export type RoomEventName = keyof typeof ROOM_EVENT_DICT
  * }
  *
  * @example <caption>Event:topic </caption>
- * const bot = WechatyBuilder.build()
+ * const bot = DevChatBuilder.build()
  * await bot.start()
  * // after logged in...
  * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat
@@ -87,7 +87,7 @@ export type RoomEventName = keyof typeof ROOM_EVENT_DICT
  * }
  *
  * @example <caption>Event:invite </caption>
- * const bot = WechatyBuilder.build()
+ * const bot = DevChatBuilder.build()
  * await bot.start()
  * // after logged in...
  * const room = await bot.Room.find({topic: 'topic of your room'}) // change `event-room` to any room topic in your WeChat

@@ -102,10 +102,10 @@ test('unloaded-source supplement adds only zero-hit production records', () => {
 test('renderer normalizes source paths and duplicate function names', () => {
   const absolute = `TN:
 SF:/repo/src/loaded.ts
-FN:23,get wechaty
-FN:24,get wechaty
-FNDA:1,get wechaty
-FNDA:0,get wechaty
+FN:23,get devchat
+FN:24,get devchat
+FNDA:1,get devchat
+FNDA:0,get devchat
 FNF:2
 FNH:1
 BRF:0
@@ -119,8 +119,8 @@ end_of_record
   const mixed = `${absolute}${record('src/unloaded.ts', 0)}`
   const normalized = normalizeLcovForRenderer(mixed, '/repo')
   assert.deepEqual(parseLcov(normalized).map(item => item.source), [ 'src/loaded.ts', 'src/unloaded.ts' ])
-  assert.match(normalized, /FN:23,get wechaty \(1\)/)
-  assert.match(normalized, /FN:24,get wechaty \(2\)/)
+  assert.match(normalized, /FN:23,get devchat \(1\)/)
+  assert.match(normalized, /FN:24,get devchat \(2\)/)
   assert.equal(parseLcov(normalized)[0]?.metrics.functions.percent, 50)
   const duplicateMetrics = summarizeLcov(parseLcov(record('src/duplicates.ts').replace(
     'FN:1,example\nFNDA:1,example\nFNF:1\nFNH:1',
@@ -134,7 +134,7 @@ end_of_record
     /functions coverage 50\.00% is below/,
   )
   assert.throws(
-    () => normalizeLcovForRenderer(absolute.replace('FNDA:0,get wechaty\n', ''), '/repo'),
+    () => normalizeLcovForRenderer(absolute.replace('FNDA:0,get devchat\n', ''), '/repo'),
     /function declarations and counts differ/,
   )
 })

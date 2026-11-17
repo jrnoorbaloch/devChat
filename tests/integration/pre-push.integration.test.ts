@@ -61,7 +61,7 @@ function createRepository (options: {
   lint?: string
   version?: string
 } = {}): Repository {
-  const temporaryDirectory = mkdtempSync(join(tmpdir(), 'wechaty-pre-push-'))
+  const temporaryDirectory = mkdtempSync(join(tmpdir(), 'devchat-pre-push-'))
   const repository = join(temporaryDirectory, 'repository')
   const remote = join(temporaryDirectory, 'remote.git')
   const branch = options.branch ?? 'main'

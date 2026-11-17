@@ -25,10 +25,10 @@ import type { Constructor } from 'clone-class'
 
 import { openGraph }          from '../helper-functions/open-graph.ts'
 import { validationMixin }    from '../user-mixins/validation.ts'
-import { wechatifyMixinBase } from '../user-mixins/wechatify.ts'
+import { devchatifyMixinBase } from '../user-mixins/devchatify.ts'
 import { log } from '../config.ts'
 
-class UrlLinkMixin extends wechatifyMixinBase() {
+class UrlLinkMixin extends devchatifyMixinBase() {
 
   public readonly payload: PUPPET.payloads.UrlLink
 
@@ -106,8 +106,8 @@ class UrlLinkMixin extends wechatifyMixinBase() {
     super()
     this.payload = payload
     log.verbose('UrlLink', 'constructor()')
-    // Huan(202110): it is ok to create a raw one without wechaty instance
-    // guardWechatifyClass.call(this, UrlLink)
+    // Huan(202110): it is ok to create a raw one without devchat instance
+    // guardDevChatifyClass.call(this, UrlLink)
   }
 
   override toString (): string {

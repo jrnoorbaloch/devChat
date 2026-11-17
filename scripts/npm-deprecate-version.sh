@@ -18,8 +18,8 @@ if [ $# -eq 0 ]; then
   echo
 
 else
-  message="${2:-WARNING: this version(odd number) is coming from a developing branch which means it is very possible UNSTABLE. Please use the latest version with even number if you are in production. You can know more about the Wechaty version numbering design at https://github.com/wechaty/wechaty/issues/905}"
+  message="${2:-WARNING: this version(odd number) is coming from a developing branch which means it is very possible UNSTABLE. Please use the latest version with even number if you are in production. You can know more about the DevChat version numbering design at upstream issue #905}"
 
-  npm deprecate "wechaty@$1" "$message"
+  npm deprecate "devchat@$1" "$message"
 
 fi

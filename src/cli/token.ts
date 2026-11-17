@@ -11,7 +11,7 @@ import {
 
 const token = subcommands({
   name: 'Token',
-  description: 'Generate & Discover TOKEN for Wechaty',
+  description: 'Generate & Discover TOKEN for DevChat',
   version: VERSION,
   cmds,
 })

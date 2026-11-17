@@ -33,7 +33,7 @@ import {
   IoClient,
   type IoClientOptions,
 }                   from '../src/io-client.ts'
-import { WechatyBuilder }  from '../src/wechaty-builder.ts'
+import { DevChatBuilder }  from '../src/devchat-builder.ts'
 
 const welcome = `
 | __        __        _           _
@@ -43,7 +43,7 @@ const welcome = `
 |    \\_/\\_/ \\___|\\___|_| |_|\\__,_|\\__|\\__, |
 |                                     |___/
 
-=============== Powered by Wechaty ===============
+=============== Powered by DevChat ===============
        -------- https://www.chatie.io --------
 
 My super power: download cloud bot from www.chatie.io
@@ -56,22 +56,22 @@ async function main () {
   const token = config.token
 
   if (!token) {
-    throw new Error('token not found: please set WECHATY_TOKEN in environment before run io-client')
+    throw new Error('token not found: please set DEVCHAT_TOKEN in environment before run io-client')
   }
 
   console.info(welcome)
-  log.info('Client', 'Starting for WECHATY_TOKEN: %s', token)
+  log.info('Client', 'Starting for DEVCHAT_TOKEN: %s', token)
 
-  const wechaty = WechatyBuilder.build({ name: token })
+  const devchat = DevChatBuilder.build({ name: token })
 
   let port
-  if (process.env['WECHATY_PUPPET_SERVER_PORT']) {
-    port = parseInt(process.env['WECHATY_PUPPET_SERVER_PORT'], 10)
+  if (process.env['DEVCHAT_PUPPET_SERVER_PORT']) {
+    port = parseInt(process.env['DEVCHAT_PUPPET_SERVER_PORT'], 10)
   }
 
   const options: IoClientOptions = {
     token,
-    wechaty,
+    devchat,
   }
   if (port) {
     options.port = port

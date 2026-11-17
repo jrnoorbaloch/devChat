@@ -18,8 +18,8 @@
  * unit tests; `AutoReply()` wires it to the bot's `message` event.
  */
 import type { Sayable }          from '../sayable/mod.ts'
-import type { WechatyPlugin }    from '../plugin.ts'
-import type { WechatyInterface } from '../wechaty/mod.ts'
+import type { DevChatPlugin }    from '../plugin.ts'
+import type { DevChatInterface } from '../devchat/mod.ts'
 
 import { RateLimiter }           from './rate-limiter.ts'
 import type {
@@ -152,9 +152,9 @@ export function createAutoReplyHandler (
  * }))
  * ```
  */
-export function AutoReply (options: AutoReplyOptions): WechatyPlugin {
+export function AutoReply (options: AutoReplyOptions): DevChatPlugin {
   const handle = createAutoReplyHandler(options)
-  return (bot: WechatyInterface) => {
+  return (bot: DevChatInterface) => {
     const listener = (message: PluginMessage) => {
       handle(message).catch(error => console.error('[devChat] AutoReply failed:', error))
     }

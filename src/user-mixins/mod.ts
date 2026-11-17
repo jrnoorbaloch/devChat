@@ -8,9 +8,9 @@ import {
   validationMixin,
 }                   from './validation.ts'
 import {
-  wechatifyMixin,
-  wechatifyMixinBase,
-}                   from './wechatify.ts'
+  devchatifyMixin,
+  devchatifyMixinBase,
+}                   from './devchatify.ts'
 
 export type {
   PoolifyMixin,
@@ -18,6 +18,6 @@ export type {
 export {
   poolifyMixin,
   validationMixin,
-  wechatifyMixin,
-  wechatifyMixinBase,
+  devchatifyMixin,
+  devchatifyMixinBase,
 }

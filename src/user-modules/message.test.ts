@@ -25,7 +25,7 @@ import assert from 'node:assert/strict'
 
 import * as PUPPET        from 'wechaty-puppet'
 import { PuppetMock }     from 'wechaty-puppet-mock'
-import { WechatyBuilder } from '../wechaty-builder.ts'
+import { DevChatBuilder } from '../devchat-builder.ts'
 import type {
   MessageImpl,
   MessageProtectedProperty,
@@ -42,17 +42,17 @@ test('recalled()', async t => {
   const EXPECTED_LISTENER_CONTACT_ID = 'listener-contact-id'
 
   const puppet = new PuppetMock()
-  const wechaty = WechatyBuilder.build({ puppet })
+  const devchat = DevChatBuilder.build({ puppet })
 
   let started = false
   t.after(async () => {
     if (started) {
-      await wechaty.stop()
+      await devchat.stop()
     }
   })
 
   started = true
-  await wechaty.start()
+  await devchat.start()
 
   t.mock.method(puppet, 'messagePayload', async (id: string) => {
     await new Promise(resolve => setImmediate(resolve))
@@ -106,7 +106,7 @@ test('recalled()', async t => {
 
   await puppet.login(EXPECTED_LISTENER_CONTACT_ID)
 
-  const message = await wechaty.Message.find({ id: EXPECTED_RECALL_MESSAGE_ID })
+  const message = await devchat.Message.find({ id: EXPECTED_RECALL_MESSAGE_ID })
   if (!message) {
     throw new Error('no message for id: ' + EXPECTED_RECALL_MESSAGE_ID)
   }
@@ -117,14 +117,14 @@ test('recalled()', async t => {
   assert.equal(recalledMessage!.listener()!.id, EXPECTED_LISTENER_CONTACT_ID, 'Recalled message should have the right to contact id.')
   assert.equal(recalledMessage!.room()!.id, EXPECTED_ROOM_ID, 'Recalled message should have the right room id.')
 
-  await wechaty.stop()
+  await devchat.stop()
   started = false
 })
 
 test('ProtectedProperties', async _t => {
-  type NotExistInWechaty = Exclude<MessageProtectedProperty, keyof MessageImpl>
-  type NotExistTest = NotExistInWechaty extends never ? true : false
+  type NotExistInDevChat = Exclude<MessageProtectedProperty, keyof MessageImpl>
+  type NotExistTest = NotExistInDevChat extends never ? true : false
 
   const noOneLeft: NotExistTest = true
-  assert.ok(noOneLeft, 'should match Wechaty properties for every protected property')
+  assert.ok(noOneLeft, 'should match DevChat properties for every protected property')
 })

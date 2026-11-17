@@ -10,8 +10,8 @@ import {
 }           from 'wechaty-puppet-mock'
 
 import {
-  WechatyBuilder,
-}           from '../wechaty-builder.ts'
+  DevChatBuilder,
+}           from '../devchat-builder.ts'
 
 async function withImmediateTimers<T> (
   callback: () => Promise<T>,
@@ -36,14 +36,14 @@ async function withImmediateTimers<T> (
 
 test('accept retries contact synchronization without repeating provider acceptance', async () => {
   const puppet = new PuppetMock()
-  const wechaty = WechatyBuilder.build({ puppet })
-  wechaty.on('error', () => {})
+  const devchat = DevChatBuilder.build({ puppet })
+  devchat.on('error', () => {})
 
   const mockContact = puppet.mocker.createContact({ name: 'Friend' })
-  await wechaty.start()
+  await devchat.start()
 
   try {
-    const friendship = wechaty.Friendship.load('friendship-id')
+    const friendship = devchat.Friendship.load('friendship-id')
     friendship.payload = {
       id: 'friendship-id',
       contactId: mockContact.id,
@@ -80,23 +80,23 @@ test('accept retries contact synchronization without repeating provider acceptan
     assert.ok(contact.isReady(), 'leaves the contact ready after synchronization')
     assert.equal(syncCalls, 1, 'runs the final contact sync once')
   } finally {
-    await wechaty.stop()
+    await devchat.stop()
   }
 })
 
 test('accept emits the final synchronization error and still syncs the contact', async () => {
   const puppet = new PuppetMock()
-  const wechaty = WechatyBuilder.build({ puppet })
+  const devchat = DevChatBuilder.build({ puppet })
   const emittedErrors: unknown[] = []
-  wechaty.on('error', error => {
+  devchat.on('error', error => {
     emittedErrors.push(error)
   })
 
   const mockContact = puppet.mocker.createContact({ name: 'Friend' })
-  await wechaty.start()
+  await devchat.start()
 
   try {
-    const friendship = wechaty.Friendship.load('friendship-id')
+    const friendship = devchat.Friendship.load('friendship-id')
     friendship.payload = {
       id: 'friendship-id',
       contactId: mockContact.id,
@@ -131,6 +131,6 @@ test('accept emits the final synchronization error and still syncs the contact',
     assert.ok(emittedErrors.every(error => error instanceof Error && error.message === finalError.message), 'preserves the final error message')
     assert.equal(syncCalls, 1, 'runs the final contact sync after retries are exhausted')
   } finally {
-    await wechaty.stop()
+    await devchat.stop()
   }
 })

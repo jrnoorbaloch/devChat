@@ -10,5 +10,5 @@ test('Export of the Framework', async _t => {
   assert.ok(impls.FriendshipImpl, 'should export Friendship')
   assert.ok(impls.MessageImpl,    'should export Message')
   assert.ok(impls.RoomImpl,       'should export Room')
-  assert.ok(impls.WechatyImpl,    'should export Wechaty')
+  assert.ok(impls.DevChatImpl,    'should export DevChat')
 })

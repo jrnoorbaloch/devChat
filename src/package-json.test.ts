@@ -12,7 +12,7 @@ test('Make sure the packageJson is fresh in source code', async _t => {
    *  be overwrite
    *    by the real data before deploy
    */
-  delete json['wechaty']
+  delete json['devchat']
 
   const keyNum = Object.keys(json).length
   assert.equal(keyNum, 0, 'packageJson should be empty in source code, only updated before publish to NPM')

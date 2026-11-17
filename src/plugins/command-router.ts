@@ -20,8 +20,8 @@
  * to the bot's `message` event.
  */
 import type { Sayable }        from '../sayable/mod.ts'
-import type { WechatyPlugin }  from '../plugin.ts'
-import type { WechatyInterface } from '../wechaty/mod.ts'
+import type { DevChatPlugin }  from '../plugin.ts'
+import type { DevChatInterface } from '../devchat/mod.ts'
 
 import { RateLimiter }         from './rate-limiter.ts'
 import type {
@@ -44,7 +44,7 @@ export interface CommandContext extends ParsedCommand {
   /** The message that triggered the command. */
   message: PluginMessage
   /** The bot, when the router runs as a plugin; `undefined` in unit tests. */
-  bot?: WechatyInterface
+  bot?: DevChatInterface
 }
 
 /**
@@ -180,7 +180,7 @@ function buildRegistry (
  */
 export function createCommandHandler (
   options: CommandRouterOptions,
-): (message: PluginMessage, bot?: WechatyInterface) => Promise<boolean> {
+): (message: PluginMessage, bot?: DevChatInterface) => Promise<boolean> {
   const prefix    = options.prefix ?? '/'
   if (!prefix) {
     throw new RangeError('CommandRouter: prefix must not be empty')
@@ -256,9 +256,9 @@ export function createCommandHandler (
  *
  * The returned uninstaller removes the `message` listener.
  */
-export function CommandRouter (options: CommandRouterOptions): WechatyPlugin {
+export function CommandRouter (options: CommandRouterOptions): DevChatPlugin {
   const handle = createCommandHandler(options)
-  return (bot: WechatyInterface) => {
+  return (bot: DevChatInterface) => {
     // `say()` itself can reject (network, puppet logout); catch here so a
     // failed reply never becomes an unhandled rejection that kills the process.
     const listener = (message: PluginMessage) => {

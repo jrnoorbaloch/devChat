@@ -18,5 +18,5 @@
  *   limitations under the License.
  *
  */
-import { log } from 'wechaty'
+import { log } from 'devchat'
 log.info('OK', 'with-import.ts')

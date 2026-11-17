@@ -2,7 +2,7 @@ FROM debian:bookworm
 LABEL maintainer="jrnoorbaloch <https://github.com/jrnoorbaloch>"
 
 ENV DEBIAN_FRONTEND     noninteractive
-ENV WECHATY_DOCKER      1
+ENV DEVCHAT_DOCKER      1
 ENV LC_ALL              C.UTF-8
 ENV NODE_ENV            $NODE_ENV
 ENV NPM_CONFIG_LOGLEVEL warn
@@ -43,7 +43,7 @@ RUN curl -sL https://deb.nodesource.com/setup_26.x | bash - \
     && apt-get purge --auto-remove \
     && rm -rf /tmp/* /var/lib/apt/lists/*
 
-WORKDIR /wechaty
+WORKDIR /devchat
 
 # Node's WebAssembly trap handler can fail while stripping TypeScript under
 # ARM64 QEMU. Use explicit bounds checks during the build, not at runtime.
@@ -68,7 +68,7 @@ RUN  npm run puppet-install \
 
 #
 # Enable ES Modules support #2232
-#   See: https://github.com/wechaty/wechaty/issues/2232
+#   See: upstream issue #2232
 #
 RUN echo '{"type": "module"}' > /package.json
 
@@ -76,14 +76,14 @@ RUN echo '{"type": "module"}' > /package.json
 # If it is not found there, then it moves to the parent directory, and so on, until the root of the file system is reached.
 RUN  mkdir /node_modules \
   && ln -sfv /usr/lib/node_modules/*  /node_modules/ \
-  && ln -sfv /wechaty/node_modules/*  /node_modules/ \
-  && ln -sfnv /wechaty /node_modules/wechaty \
-  && /wechaty/bin/clean-json.js /wechaty/tsconfig.json > /tsconfig.json \
-  && echo 'Linked Wechaty & tsconfig.json to Global'
+  && ln -sfv /devchat/node_modules/*  /node_modules/ \
+  && ln -sfnv /devchat /node_modules/devchat \
+  && /devchat/bin/clean-json.js /devchat/tsconfig.json > /tsconfig.json \
+  && echo 'Linked DevChat & tsconfig.json to Global'
 
 WORKDIR /bot
 
-ENTRYPOINT  [ "/wechaty/bin/entrypoint.sh" ]
+ENTRYPOINT  [ "/devchat/bin/entrypoint.sh" ]
 CMD        [ "" ]
 
 #
@@ -96,13 +96,13 @@ LABEL \
   org.label-schema.version="$DOCKER_TAG" \
   org.label-schema.schema-version="$(devchat-version)" \
   org.label-schema.name="devChat" \
-  org.label-schema.description="devChat - TypeScript chatbot SDK (Wechaty fork)" \
-  org.label-schema.usage="https://wechaty.js.org/docs/tutorials/docker" \
+  org.label-schema.description="devChat - TypeScript chatbot SDK (DevChat fork)" \
+  org.label-schema.usage="https://devchat-docs.vercel.app" \
   org.label-schema.url="https://github.com/jrnoorbaloch/devChat" \
   org.label-schema.vendor="Chatie" \
   org.label-schema.vcs-ref="$SOURCE_COMMIT" \
   org.label-schema.vcs-url="https://github.com/jrnoorbaloch/devChat" \
-  org.label-schema.docker.cmd="docker run -ti --rm wechaty/wechaty <code.js>" \
-  org.label-schema.docker.cmd.test="docker run -ti --rm wechaty/wechaty test" \
-  org.label-schema.docker.cmd.help="docker run -ti --rm wechaty/wechaty help" \
-  org.label-schema.docker.params="WECHATY_TOKEN=token token from https://www.chatie.io, WECHATY_LOG=verbose Set Verbose Log, TZ='Asia/Shanghai' TimeZone"
+  org.label-schema.docker.cmd="docker run -ti --rm jrnoorbaloch/devchat <code.js>" \
+  org.label-schema.docker.cmd.test="docker run -ti --rm jrnoorbaloch/devchat test" \
+  org.label-schema.docker.cmd.help="docker run -ti --rm jrnoorbaloch/devchat help" \
+  org.label-schema.docker.params="DEVCHAT_TOKEN=token token from https://www.chatie.io, DEVCHAT_LOG=verbose Set Verbose Log, TZ='Asia/Shanghai' TimeZone"

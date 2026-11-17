@@ -2,10 +2,10 @@ import * as PUPPET from 'wechaty-puppet'
 import { FileBox } from 'file-box'
 
 import {
-  WechatyBuilder,
+  DevChatBuilder,
 }                     from '../src/mods/mod.ts'
 
-const bot = WechatyBuilder.build({
+const bot = DevChatBuilder.build({
   name : 'video-post-bot',
 })
 
@@ -20,7 +20,7 @@ async function testVideoPost () {
   const post = await bot.Post.builder()
     .add('hello, world')
     .add(FileBox.fromQRCode('qr'))
-    .add(await bot.UrlLink.create('https://wechaty.js.org'))
+    .add(await bot.UrlLink.create('https://devchat-docs.vercel.app'))
     .build()
 
   await bot.say(post)
@@ -50,7 +50,7 @@ async function testVideoPost () {
     await post2.reply('xxxx')
     await post2.reply(FileBox.fromQRCode('qrimage'))
 
-    for await (const descendant of post.descendants({ contactId: message.wechaty.currentUser.id })) {
+    for await (const descendant of post.descendants({ contactId: message.devchat.currentUser.id })) {
       console.info(descendant)
     }
 

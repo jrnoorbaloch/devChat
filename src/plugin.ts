@@ -1,19 +1,19 @@
-import type { WechatyInterface } from './wechaty/mod.ts'
+import type { DevChatInterface } from './devchat/mod.ts'
 
-export type WechatyPluginUninstaller = () => void
+export type DevChatPluginUninstaller = () => void
 
-export type WechatyPluginReturn = void | WechatyPluginUninstaller
+export type DevChatPluginReturn = void | DevChatPluginUninstaller
 
-export interface WechatyPlugin {
-  (bot: WechatyInterface): WechatyPluginReturn
+export interface DevChatPlugin {
+  (bot: DevChatInterface): DevChatPluginReturn
 }
 
-function isWechatyPluginUninstaller (
-  pluginReturn: WechatyPluginReturn,
-): pluginReturn is WechatyPluginUninstaller {
+function isDevChatPluginUninstaller (
+  pluginReturn: DevChatPluginReturn,
+): pluginReturn is DevChatPluginUninstaller {
   return typeof pluginReturn === 'function'
 }
 
 export {
-  isWechatyPluginUninstaller,
+  isDevChatPluginUninstaller,
 }

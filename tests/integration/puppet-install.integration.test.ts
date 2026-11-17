@@ -37,7 +37,7 @@ if (process.argv.slice(4).includes(process.env.FAIL_PROVIDER)) process.exit(7)
           FAIL_PROVIDER: fail ? failedProvider : '',
           INSTALL_CALLS: calls,
           PATH: `${directory}${delimiter}${process.env['PATH'] ?? ''}`,
-          WECHATY_LOG: 'info',
+          DEVCHAT_LOG: 'info',
         },
         timeout: 60_000,
       })

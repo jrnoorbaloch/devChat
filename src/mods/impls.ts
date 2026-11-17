@@ -108,9 +108,9 @@ export type {
 }                               from '../user-modules/mod.ts'
 
 export {
-  WechatyImpl,
-}                         from '../wechaty/mod.ts'
+  DevChatImpl,
+}                         from '../devchat/mod.ts'
 export type {
-  WechatyInterface,
-  WechatyConstructor,
-}                         from '../wechaty/mod.ts'
+  DevChatInterface,
+  DevChatConstructor,
+}                         from '../devchat/mod.ts'

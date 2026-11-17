@@ -2,30 +2,30 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import openGraph from 'open-graph'
-import type { Wechaty } from '../mods/mod.ts'
+import type { DevChat } from '../mods/mod.ts'
 import { MessageImpl } from './message.ts'
 
-import { wechatifyUserModule } from './mod.ts'
+import { devchatifyUserModule } from './mod.ts'
 import { UrlLinkImpl } from './url-link.ts'
 
-const wechaty = {
+const devchat = {
   puppet: {} as any,
-} as any as Wechaty
+} as any as DevChat
 
-const UrlLinkTest = wechatifyUserModule(UrlLinkImpl)(wechaty)
+const UrlLinkTest = devchatifyUserModule(UrlLinkImpl)(devchat)
 
-test('UrlLink.create() for wechaty.js.org', async t => {
-  const URL = 'https://wechaty.js.org/2020/07/02/wechat-bot-in-ten-minutes'
+test('UrlLink.create() reads Open Graph metadata', async t => {
+  const URL = 'https://devchat-docs.vercel.app'
   const HTML = `
     <html><head>
-      <meta property="og:title" content="十分钟实现一个智能问答微信聊天机器人">
-      <meta property="og:description" content="Conversational RPA SDK for Chatbot Makers">
-      <meta property="og:image" content="/assets/contributors/luweicn/avatar.webp">
+      <meta property="og:title" content="Getting started | devChat Docs">
+      <meta property="og:description" content="Run your first devChat bot in minutes.">
+      <meta property="og:image" content="/assets/og.png">
     </head></html>
   `
   const EXPECTED_PAYLOAD = {
-    description: 'Conversational RPA SDK for Chatbot Makers',
-    title: '十分钟实现一个智能问答微信聊天机器人',
+    description: 'Run your first devChat bot in minutes.',
+    title: 'Getting started | devChat Docs',
   }
   type RequestCallback = Parameters<typeof openGraph.getHTML>[1]
 
@@ -44,7 +44,7 @@ test('UrlLink.create() for wechaty.js.org', async t => {
   assert.equal(urlLink.title(),        EXPECTED_PAYLOAD.title, 'should have title')
   assert.equal(urlLink.description(),  EXPECTED_PAYLOAD.description, 'should have description')
   assert.equal(urlLink.url(),          URL, 'should have url')
-  assert.equal(urlLink.thumbnailUrl(), 'https://wechaty.js.org/assets/contributors/luweicn/avatar.webp', 'should have thumbnailUrl')
+  assert.equal(urlLink.thumbnailUrl(), 'https://devchat-docs.vercel.app/assets/og.png', 'should have thumbnailUrl')
 })
 
 test('UrlLink.valid()', async _t => {

@@ -1,3 +1,3 @@
-import { WechatyBuilder } from 'wechaty'
+import { DevChatBuilder } from 'devchat'
 
-console.log(WechatyBuilder.build().version())
+console.log(DevChatBuilder.build().version())

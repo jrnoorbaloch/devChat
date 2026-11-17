@@ -1,5 +1,5 @@
 <!-- title: devChat -->
-<!-- description: devChat is an open-source TypeScript chatbot SDK and bot framework for Node.js. Build WeChat, WhatsApp, WeCom and Lark bots with one API, slash commands, auto-reply and rate limiting built in. -->
+<!-- description: devChat is an open-source TypeScript chatbot SDK for Node.js. Install with one command, pick WeChat, WhatsApp or both, and get slash commands, auto-reply and rate limiting built in. -->
 <!-- order: 0 -->
 <section class="hero">
   <div>
@@ -10,7 +10,7 @@
       <a class="btn primary" href="/getting-started">Get started</a>
       <a class="btn" href="https://github.com/jrnoorbaloch/devChat" rel="noopener">Star on GitHub</a>
     </div>
-    <p class="install">$ <code>git clone https://github.com/jrnoorbaloch/devChat</code></p>
+    <p class="install">Windows: <code>irm https://raw.githubusercontent.com/jrnoorbaloch/devChat/main/install.ps1 | iex</code><br>macOS/Linux: <code>curl -fsSL https://raw.githubusercontent.com/jrnoorbaloch/devChat/main/install.sh | bash</code></p>
   </div>
   <div class="chat" aria-label="Example conversation with a devChat bot">
     <div class="chat-h"><span class="dot"></span> devchat-command-bot · online</div>
@@ -29,40 +29,40 @@
 
 <section class="section">
   <h2>Everything a bot needs, nothing it doesn't</h2>
-  <p>devChat keeps the battle-tested Wechaty core and adds the pieces every bot ends up rewriting by hand.</p>
+  <p>Everything a production chatbot needs ships in the box, so you write bot logic instead of plumbing.</p>
   <div class="grid">
     <div class="card"><span class="ico">/command</span><h3>Command router</h3><p>Slash commands with quoted arguments, aliases, an automatic <code>/help</code> and error isolation.</p></div>
     <div class="card"><span class="ico">if → reply</span><h3>Auto-reply rules</h3><p>Declare keyword, RegExp or function rules as data. Ideal for FAQ, support and greeter bots.</p></div>
     <div class="card"><span class="ico">≤ n / min</span><h3>Rate limiting</h3><p>Per-user sliding-window throttling keeps your bot account safe from floods and bans.</p></div>
     <div class="card"><span class="ico">puppet</span><h3>Many messengers</h3><p>WeChat, WhatsApp, WeCom, Lark, Gitter and more through interchangeable puppet providers.</p></div>
     <div class="card"><span class="ico">TS</span><h3>Typed end to end</h3><p>First-class TypeScript types for messages, contacts, rooms, events and plugins.</p></div>
-    <div class="card"><span class="ico">wechaty ⇄</span><h3>Wechaty compatible</h3><p>Same API as Wechaty. Existing bots, puppets and plugins keep working; <code>WECHATY_*</code> env vars too.</p></div>
+    <div class="card"><span class="ico">1 command</span><h3>One-line install</h3><p>The installer checks Node.js, installs everything and asks: WeChat, WhatsApp or both.</p></div>
   </div>
 </section>
 
 <section class="section split">
   <div>
     <h2>A useful bot in 20 lines</h2>
-    <p style="color:var(--muted)">Plug in the built-in <code>CommandRouter</code> and <code>AutoReply</code> plugins, choose a messenger with <code>DEVCHAT_PUPPET</code>, and start.</p>
+    <p style="color:var(--muted)">Plug in the built-in <code>CommandRouter</code> and <code>AutoReply</code> plugins. The same code runs on every messenger you picked in <code>npm run setup</code>.</p>
     <p><a href="/plugins">Read the plugin guide →</a></p>
   </div>
-<pre><code>import { DevChatBuilder, CommandRouter, AutoReply } from 'devchat'
+<pre><code>import { startDevChat, CommandRouter, AutoReply } from 'devchat'
 
-const bot = DevChatBuilder.build({ name: 'my-bot' })
-
-bot.use(
-  CommandRouter({
-    commands: {
-      ping: () =&gt; 'pong',
-      echo: ({ rawArgs }) =&gt; rawArgs,
-    },
-    rateLimit: { limit: 10, intervalMs: 60_000 },
-  }),
-  AutoReply({
-    rules: [{ match: 'hi', reply: 'Hello! Type /help' }],
-  }),
-)
-
-bot.on('scan', qr =&gt; console.log('Scan:', qr))
-await bot.start()</code></pre>
+await startDevChat({
+  setup: (bot, messenger) =&gt; {
+    bot.use(
+      CommandRouter({
+        commands: {
+          ping: () =&gt; 'pong',
+          echo: ({ rawArgs }) =&gt; rawArgs,
+        },
+        rateLimit: { limit: 10, intervalMs: 60_000 },
+      }),
+      AutoReply({
+        rules: [{ match: 'hi', reply: 'Hello! Type /help' }],
+      }),
+    )
+  },
+})
+// npm start → scan the QR code on WhatsApp / WeChat</code></pre>
 </section>

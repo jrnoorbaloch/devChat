@@ -18,7 +18,7 @@
  *   limitations under the License.
  *
  */
-import { WechatyBuilder } from 'wechaty'
+import { DevChatBuilder } from 'devchat'
 
-const bot = WechatyBuilder.build()
+const bot = DevChatBuilder.build()
 console.info(bot.version())

@@ -12,4 +12,4 @@
   exit 1
 }
 
-npm dist-tag add "wechaty@$1" latest
+npm dist-tag add "devchat@$1" latest

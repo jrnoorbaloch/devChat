@@ -47,7 +47,7 @@ const MixinBase = poolifyMixin(
  *
  * > Tips: this class is extends Contact
  * @example
- * const bot = WechatyBuilder.build()
+ * const bot = DevChatBuilder.build()
  * await bot.start()
  * bot.on('login', (user: ContactSelf) => {
  *   console.log(`user ${user} login`)
@@ -58,13 +58,13 @@ class ContactSelfMixin extends MixinBase {
   static override async find (
     query : string | PUPPET.filters.Contact,
   ): Promise<undefined | ContactSelfInterface> {
-    if (!this.wechaty.isLoggedIn) {
+    if (!this.devchat.isLoggedIn) {
       return undefined
     }
 
     try {
       const contact = await super.find(query)
-      if (contact && contact.id === this.wechaty.puppet.currentUserId) {
+      if (contact && contact.id === this.devchat.puppet.currentUserId) {
         return contact as ContactSelfInterface
       }
     } catch (e) {
@@ -97,7 +97,7 @@ class ContactSelfMixin extends MixinBase {
    * import { FileBox }  from 'file-box'
    * bot.on('login', (user: ContactSelf) => {
    *   console.log(`user ${user} login`)
-   *   const fileBox = FileBox.fromUrl('https://wechaty.github.io/wechaty/images/bot-qr-code.png')
+   *   const fileBox = FileBox.fromUrl('https://devchat-docs.vercel.app/assets/og.png')
    *   await user.avatar(fileBox)
    *   console.log(`Change bot avatar successfully!`)
    * })
@@ -111,11 +111,11 @@ class ContactSelfMixin extends MixinBase {
       return filebox
     }
 
-    if (this.id !== this.wechaty.puppet.currentUserId) {
+    if (this.id !== this.devchat.puppet.currentUserId) {
       throw new Error('set avatar only available for user self')
     }
 
-    await this.wechaty.puppet.contactAvatar(this.id, file)
+    await this.devchat.puppet.contactAvatar(this.id, file)
   }
 
   /**
@@ -134,11 +134,11 @@ class ContactSelfMixin extends MixinBase {
    */
   public async qrcode (): Promise<string> {
     log.verbose('Contact', 'qrcode()')
-    if (this.id !== this.wechaty.puppet.currentUserId) {
+    if (this.id !== this.devchat.puppet.currentUserId) {
       throw new Error('only can get qrcode for the currentUser')
     }
 
-    const qrcodeValue = await this.wechaty.puppet.contactSelfQRCode()
+    const qrcodeValue = await this.devchat.puppet.contactSelfQRCode()
     return guardQrCodeValue(qrcodeValue)
   }
 
@@ -168,11 +168,11 @@ class ContactSelfMixin extends MixinBase {
       return super.name()
     }
 
-    if (this.id !== this.wechaty.puppet.currentUserId) {
+    if (this.id !== this.devchat.puppet.currentUserId) {
       throw new Error('only can set name for user self')
     }
 
-    return this.wechaty.puppet.contactSelfName(name).then(this.sync.bind(this))
+    return this.devchat.puppet.contactSelfName(name).then(this.sync.bind(this))
   }
 
   /**
@@ -184,7 +184,7 @@ class ContactSelfMixin extends MixinBase {
    * bot.on('login', async user => {
    *   console.log(`user ${user} login`)
    *   try {
-   *     await user.signature(`Signature changed by wechaty on ${new Date()}`)
+   *     await user.signature(`Signature changed by devchat on ${new Date()}`)
    *   } catch (e) {
    *     console.error('change signature failed', e)
    *   }
@@ -193,11 +193,11 @@ class ContactSelfMixin extends MixinBase {
   public async signature (signature: string): Promise<void> {
     log.verbose('ContactSelf', 'signature()')
 
-    if (this.id !== this.wechaty.puppet.currentUserId) {
+    if (this.id !== this.devchat.puppet.currentUserId) {
       throw new Error('only can change signature for user self')
     }
 
-    return this.wechaty.puppet.contactSelfSignature(signature).then(this.sync.bind(this))
+    return this.devchat.puppet.contactSelfSignature(signature).then(this.sync.bind(this))
   }
 
 }

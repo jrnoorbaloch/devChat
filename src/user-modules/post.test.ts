@@ -26,31 +26,31 @@ import * as PUPPET from 'wechaty-puppet'
 import PuppetMock from 'wechaty-puppet-mock'
 import { FileBox } from 'file-box'
 
-import { WechatyBuilder } from '../wechaty-builder.ts'
+import { DevChatBuilder } from '../devchat-builder.ts'
 
 test.skip('Post smoke testing', async t => {
 
   const puppet = new PuppetMock()
-  const wechaty = WechatyBuilder.build({ puppet })
+  const devchat = DevChatBuilder.build({ puppet })
   let started = false
   t.after(async () => {
     if (started) {
-      await wechaty.stop()
+      await devchat.stop()
     }
   })
 
   started = true
-  await wechaty.start()
+  await devchat.start()
   const bot = puppet.mocker.createContact({ name: 'Bot' })
   puppet.mocker.login(bot)
 
-  const post = await wechaty.Post.builder()
+  const post = await devchat.Post.builder()
     .add('Hello, world!')
     .add(FileBox.fromQRCode('qr'))
-    .add(await wechaty.UrlLink.create('https://yahoo.com'))
+    .add(await devchat.UrlLink.create('https://yahoo.com'))
     .build()
 
-  await wechaty.say(post)
+  await devchat.say(post)
 
   await post.reply('Thanks for sharing!')
   await post.like(true)
@@ -69,7 +69,7 @@ test.skip('Post smoke testing', async t => {
     assert.ok(descendantPost, 'tbw')
   }
 
-  const [ descendantList, _nextPageToken2 ] = await wechaty.Post.findAll({}, pagination)
+  const [ descendantList, _nextPageToken2 ] = await devchat.Post.findAll({}, pagination)
   assert.ok(descendantList, 'tbw')
 
   for await (const liker of post.taps({ type: PUPPET.types.Tap.Like })) {
@@ -79,6 +79,6 @@ test.skip('Post smoke testing', async t => {
   const [ tapList, _nextPageToken3 ] = await post.tapFind({ type: PUPPET.types.Tap.Like }, pagination)
   assert.ok(tapList, 'tbw')
 
-  await wechaty.stop()
+  await devchat.stop()
   started = false
 })

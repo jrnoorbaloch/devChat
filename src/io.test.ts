@@ -21,7 +21,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { WechatyBuilder } from './wechaty-builder.ts'
+import { DevChatBuilder } from './devchat-builder.ts'
 
 import { Io }       from './io.ts'
 
@@ -30,7 +30,7 @@ test.skip('Io restart without problem', async _t => {
     // token must not contain any white spaces
     servicePort : 8788,
     token       : 'mock_00000000-0000-0000-0000-000000000000',
-    wechaty     : WechatyBuilder.build(),
+    devchat     : DevChatBuilder.build(),
   })
 
   try {

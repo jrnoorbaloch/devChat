@@ -27,10 +27,10 @@ import { validationMixin } from '../user-mixins/validation.ts'
 import { log } from '../config.ts'
 
 import {
-  wechatifyMixinBase,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                       from '../user-mixins/devchatify.ts'
 
-class ImageMixin extends wechatifyMixinBase() {
+class ImageMixin extends devchatifyMixinBase() {
 
   public id: string
 
@@ -51,7 +51,7 @@ class ImageMixin extends wechatifyMixinBase() {
 
   async thumbnail (): Promise<FileBoxInterface> {
     log.verbose('Image', 'thumbnail() for id: "%s"', this.id)
-    const fileBox = await this.wechaty.puppet.messageImage(
+    const fileBox = await this.devchat.puppet.messageImage(
       this.id,
       PUPPET.types.Image.Thumbnail,
     )
@@ -60,7 +60,7 @@ class ImageMixin extends wechatifyMixinBase() {
 
   async hd (): Promise<FileBoxInterface> {
     log.verbose('Image', 'hd() for id: "%s"', this.id)
-    const fileBox = await this.wechaty.puppet.messageImage(
+    const fileBox = await this.devchat.puppet.messageImage(
       this.id,
       PUPPET.types.Image.HD,
     )
@@ -69,7 +69,7 @@ class ImageMixin extends wechatifyMixinBase() {
 
   async artwork (): Promise<FileBoxInterface> {
     log.verbose('Image', 'artwork() for id: "%s"', this.id)
-    const fileBox = await this.wechaty.puppet.messageImage(
+    const fileBox = await this.devchat.puppet.messageImage(
       this.id,
       PUPPET.types.Image.Artwork,
     )

@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-export ARTIFACT_IMAGE="${ARTIFACT_IMAGE:-wechaty/wechaty:artifact}"
+export ARTIFACT_IMAGE="${ARTIFACT_IMAGE:-jrnoorbaloch/devchat:artifact}"
 
 function dockerBuild () {
   platform=$1     # `all` for all platforms, `linux/amd64`, `linux/arm64`, etc.
@@ -20,26 +20,26 @@ function dockerBuild () {
     docker buildx build \
     "${options[@]}" \
     --platform "$platform" \
-    --tag "wechaty/wechaty:$tag" \
+    --tag "jrnoorbaloch/devchat:$tag" \
     .
 _CMD_
 
   docker buildx build \
     "${options[@]}" \
     --platform "$platform" \
-    --tag "wechaty/wechaty:$tag" \
+    --tag "jrnoorbaloch/devchat:$tag" \
     .
 }
 
 function deployOnbuild () {
   export tag=$1
 
-  echo "Building & Deploying 'wechaty/onbuild:$tag' based on 'wechaty/wechaty:$tag'"
+  echo "Building & Deploying 'jrnoorbaloch/devchat-onbuild:$tag' based on 'jrnoorbaloch/devchat:$tag'"
 
   docker buildx build \
-      --build-arg "WECHATY_BASE=wechaty/wechaty:$tag" \
+      --build-arg "DEVCHAT_BASE=jrnoorbaloch/devchat:$tag" \
       --platform 'linux/amd64,linux/arm64' \
-      --tag "wechaty/onbuild:$tag" \
+      --tag "jrnoorbaloch/devchat-onbuild:$tag" \
       --push \
       -f Dockerfile.onbuild \
       .

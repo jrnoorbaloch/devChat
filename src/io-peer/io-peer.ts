@@ -22,7 +22,7 @@ const getPeer = (options: IoPeerOptions) => {
   const serviceImpl = {
     /**
      * Huan(202101) Need to be fixed by new IO Bus system.
-     *  See: https://github.com/wechaty/wechaty-puppet-service/issues/118
+     *  See: upstream wechaty-puppet-service issue #118
      */
     getHostieGrpcPort: getServiceGrpcPort,
   }
@@ -44,7 +44,7 @@ const getPeer = (options: IoPeerOptions) => {
       switch (serviceMethodName) {
         /**
          * Huan(202101) Need to be fixed by new IO Bus system.
-         *  See: https://github.com/wechaty/wechaty-puppet-service/issues/118
+         *  See: upstream wechaty-puppet-service issue #118
          */
         case 'getHostieGrpcPort':
           return serviceImpl[serviceMethodName]()

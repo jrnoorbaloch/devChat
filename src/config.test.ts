@@ -86,28 +86,38 @@ test('validApiHost()', async _t => {
 // })
 
 test('systemPuppetName ()', async _t => {
-  const WECHATY_PUPPET_ORIG = process.env['WECHATY_PUPPET']
+  const DEVCHAT_PUPPET_ORIG = process.env['DEVCHAT_PUPPET']
 
-  delete process.env['WECHATY_PUPPET']
+  delete process.env['DEVCHAT_PUPPET']
   assert.equal(config.systemPuppetName(), 'wechaty-puppet-wechat4u', 'should get wechaty-puppet-wechat4u as default puppet name')
 
-  process.env['WECHATY_PUPPET'] = 'wechaty-puppet-mock'
+  process.env['DEVCHAT_PUPPET'] = 'wechaty-puppet-mock'
   assert.equal(config.systemPuppetName(), 'wechaty-puppet-mock', 'should get puppet name from process.env')
 
   // restore the original value
-  process.env['WECHATY_PUPPET'] = WECHATY_PUPPET_ORIG
+  process.env['DEVCHAT_PUPPET'] = DEVCHAT_PUPPET_ORIG
 })
 
-test('envSetting() prefers DEVCHAT_ over legacy WECHATY_ variables', async _t => {
+test('envSetting() reads DEVCHAT_ variables', async _t => {
   const { envSetting } = await import('./config.ts')
 
   assert.equal(envSetting('PUPPET', {}), undefined, 'should be undefined when nothing is set')
-  assert.equal(envSetting('PUPPET', { WECHATY_PUPPET: 'legacy' }), 'legacy', 'should fall back to WECHATY_')
-  assert.equal(envSetting('PUPPET', { DEVCHAT_PUPPET: 'new' }), 'new', 'should read DEVCHAT_')
-  assert.equal(
-    envSetting('PUPPET', { DEVCHAT_PUPPET: 'new', WECHATY_PUPPET: 'legacy' }),
-    'new',
-    'DEVCHAT_ should win when both are set',
-  )
-  assert.equal(envSetting('TOKEN', { DEVCHAT_TOKEN: '', WECHATY_TOKEN: 't' }), 't', 'empty DEVCHAT_ should not shadow WECHATY_')
+  assert.equal(envSetting('PUPPET', { DEVCHAT_PUPPET: 'wechat' }), 'wechat', 'should read DEVCHAT_')
+  assert.equal(envSetting('TOKEN', { DEVCHAT_TOKEN: '' }), undefined, 'empty values count as unset')
+})
+
+test('bridgeEnv() mirrors DEVCHAT_ variables for dependency packages without overwriting', async _t => {
+  const { bridgeEnv, DEPENDENCY_ENV_PREFIX } = await import('./env-bridge.ts')
+  const env: NodeJS.ProcessEnv = {
+    DEVCHAT_LOG: 'verbose',
+    DEVCHAT_PUPPET_SERVICE_TOKEN: 'abc',
+    DEVCHAT_EMPTY: '',
+    [`${DEPENDENCY_ENV_PREFIX}PUPPET_SERVICE_TOKEN`]: 'already-set',
+    OTHER: 'x',
+  }
+  const set = bridgeEnv(env)
+  assert.deepEqual(set, [ `${DEPENDENCY_ENV_PREFIX}LOG` ])
+  assert.equal(env[`${DEPENDENCY_ENV_PREFIX}LOG`], 'verbose')
+  assert.equal(env[`${DEPENDENCY_ENV_PREFIX}PUPPET_SERVICE_TOKEN`], 'already-set', 'must not overwrite')
+  assert.equal(env[`${DEPENDENCY_ENV_PREFIX}EMPTY`], undefined, 'empty values are not copied')
 })

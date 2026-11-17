@@ -19,11 +19,11 @@
  *
  */
 import {
-  WechatyBuilder,
+  DevChatBuilder,
   ScanStatus,
   type Message,
   type Contact,
-}                     from '../src/mods/mod.ts' // from 'wechaty'
+}                     from '../src/mods/mod.ts' // from 'devchat'
 
 import qrTerm from 'qrcode-terminal'
 import { FileBox } from 'file-box'
@@ -38,15 +38,15 @@ const options = {
 
   /**
    * You can specify different puppet for different IM protocols.
-   * Learn more from https://wechaty.js.org/docs/puppet-providers/
+   * Learn more from https://devchat-docs.vercel.app
    */
   // puppet: 'wechaty-puppet-whatsapp'
 
   /**
-   * You can use wechaty puppet provider 'wechaty-puppet-service'
-   *   which can connect to Wechaty Puppet Services
+   * You can use devchat puppet provider 'wechaty-puppet-service'
+   *   which can connect to DevChat Puppet Services
    *   for using more powerful protocol.
-   * Learn more about services (and TOKEN)from https://wechaty.js.org/docs/puppet-services/
+   * Learn more about services (and TOKEN)from https://devchat-docs.vercel.app
    */
   // puppet: 'wechaty-puppet-service'
   // puppetOptions: {
@@ -54,7 +54,7 @@ const options = {
   // }
 }
 
-const bot = WechatyBuilder.build(options)
+const bot = DevChatBuilder.build(options)
 
 /**
  *
@@ -96,7 +96,7 @@ function onScan (qrcode: string, status: ScanStatus) {
     qrTerm.generate(qrcode)
 
     const qrcodeImageUrl = [
-      'https://wechaty.js.org/qrcode/',
+      'https://devchat-docs.vercel.app/qrcode/',
       encodeURIComponent(qrcode),
     ].join('')
 
@@ -120,7 +120,7 @@ function onError (e: Error) {
   console.error('Bot error:', e)
   /*
   if (bot.isLoggedIn) {
-    bot.say('Wechaty error: ' + e.message).catch(console.error)
+    bot.say('DevChat error: ' + e.message).catch(console.error)
   }
   */
 }
@@ -160,7 +160,7 @@ async function onMessage (msg: Message) {
   /**
    * 2. reply image(qrcode image)
    */
-  const fileBox = FileBox.fromUrl('https://wechaty.github.io/wechaty/images/bot-qr-code.png')
+  const fileBox = FileBox.fromUrl('https://devchat-docs.vercel.app/assets/og.png')
 
   await msg.say(fileBox)
   console.info('REPLY: %s', fileBox.toString())
@@ -169,9 +169,9 @@ async function onMessage (msg: Message) {
    * 3. reply 'scan now!'
    */
   await msg.say([
-    'Join Wechaty Developers Community\n\n',
-    'Scan now, because other Wechaty developers want to talk with you too!\n\n',
-    '(secret code: wechaty)',
+    'Join DevChat Developers Community\n\n',
+    'Scan now, because other DevChat developers want to talk with you too!\n\n',
+    '(secret code: devchat)',
   ].join(''))
 }
 
@@ -188,8 +188,8 @@ const welcome = `
 |    \\_/\\_/ \\___|\\___|_| |_|\\__,_|\\__|\\__, |
 |                                     |___/
 
-=============== Powered by Wechaty ===============
--------- https://github.com/wechaty/wechaty --------
+=============== Powered by DevChat ===============
+-------- https://github.com/jrnoorbaloch/devChat --------
           Version: ${bot.version()}
 
 I'm a bot, my superpower is talk in Wechat.

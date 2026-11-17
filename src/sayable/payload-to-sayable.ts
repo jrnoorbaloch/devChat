@@ -1,16 +1,16 @@
 import * as PUPPET from 'wechaty-puppet'
 import { log }  from 'wechaty-puppet'
 
-import type { WechatyInterface } from '../wechaty/wechaty-impl.ts'
+import type { DevChatInterface } from '../devchat/devchat-impl.ts'
 
 import type {
   Sayable,
 }                   from './types.ts'
 
-const payloadToSayableWechaty: (w: WechatyInterface) => (p: PUPPET.payloads.Sayable) => Promise<undefined | Sayable> = (wechaty: WechatyInterface) => async (
+const payloadToSayableDevChat: (w: DevChatInterface) => (p: PUPPET.payloads.Sayable) => Promise<undefined | Sayable> = (devchat: DevChatInterface) => async (
   sayable: PUPPET.payloads.Sayable,
 ) => {
-  log.verbose('Wechaty', 'payloadToSayable({type: %s(%s)})',
+  log.verbose('DevChat', 'payloadToSayable({type: %s(%s)})',
     PUPPET.types.Message[sayable.type],
     sayable.type,
   )
@@ -27,19 +27,19 @@ const payloadToSayableWechaty: (w: WechatyInterface) => (p: PUPPET.payloads.Saya
       return sayable.payload.filebox
 
     case PUPPET.types.Sayable.Contact:
-      return wechaty.Contact.find({ id: sayable.payload.contactId })
+      return devchat.Contact.find({ id: sayable.payload.contactId })
 
     case PUPPET.types.Sayable.Location:
-      return new wechaty.Location(sayable.payload)
+      return new devchat.Location(sayable.payload)
 
     case PUPPET.types.Sayable.MiniProgram:
-      return new wechaty.MiniProgram(sayable.payload)
+      return new devchat.MiniProgram(sayable.payload)
 
     case PUPPET.types.Sayable.Url:
-      return new wechaty.UrlLink(sayable.payload)
+      return new devchat.UrlLink(sayable.payload)
 
     case PUPPET.types.Sayable.Post:
-      return new wechaty.Post(sayable.payload)
+      return new devchat.Post(sayable.payload)
 
     default:
       throw new Error('payloadToSayable() not support payload: ' + JSON.stringify(sayable))
@@ -47,5 +47,5 @@ const payloadToSayableWechaty: (w: WechatyInterface) => (p: PUPPET.payloads.Saya
 }
 
 export {
-  payloadToSayableWechaty,
+  payloadToSayableDevChat,
 }

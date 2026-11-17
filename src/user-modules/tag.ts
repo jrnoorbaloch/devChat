@@ -32,11 +32,11 @@ import {
 }                     from '../user-mixins/poolify.ts'
 import { validationMixin } from '../user-mixins/validation.ts'
 import {
-  wechatifyMixinBase,
-}                     from '../user-mixins/wechatify.ts'
+  devchatifyMixinBase,
+}                     from '../user-mixins/devchatify.ts'
 
 const MixinBase = poolifyMixin(
-  wechatifyMixinBase(),
+  devchatifyMixinBase(),
 )<TagInterface>()
 
 class TagMixin extends MixinBase {
@@ -58,13 +58,13 @@ class TagMixin extends MixinBase {
    * Get a Tag instance for "tag"
    *
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/Chatie/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/Chatie/devchat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @static
    * @param {string} [tag] the tag name which want to create
    * @returns {Promise<TagImpl>}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * await bot.Tag.get('TagName')
    */
   static async get (
@@ -84,8 +84,8 @@ class TagMixin extends MixinBase {
    * @static
    * @returns {Promise<TagInterface[]>}
    * @example
-   * const tag = wechaty.Tag.get('tag')
-   * await wechaty.Tag.delete(tag)
+   * const tag = devchat.Tag.get('tag')
+   * await devchat.Tag.delete(tag)
    */
 
   /**
@@ -109,14 +109,14 @@ class TagMixin extends MixinBase {
        * TODO(huan): add tag check code here for checking if this tag is still being used.
        */
 
-      if (!target || target === ContactImpl || target === this.wechaty.Contact) {
-        await this.wechaty.puppet.tagContactDelete(tag.id)
+      if (!target || target === ContactImpl || target === this.devchat.Contact) {
+        await this.devchat.puppet.tagContactDelete(tag.id)
       // TODO:
-      // } else if (!target || target === Favorite || target === this.wechaty.Favorite) {
-      //   await this.wechaty.puppet.tagFavoriteDelete(tag.id)
+      // } else if (!target || target === Favorite || target === this.devchat.Favorite) {
+      //   await this.devchat.puppet.tagFavoriteDelete(tag.id)
       }
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.error('Tag', 'static delete() exception: %s', (e as Error).message)
     }
   }
@@ -125,7 +125,7 @@ class TagMixin extends MixinBase {
    * Add tag for contact
    *
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/Chatie/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/Chatie/devchat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @param {ContactInterface} [to] the contact which need to add tag
    * @returns {Promise<void>}
@@ -144,12 +144,12 @@ class TagMixin extends MixinBase {
      */
     try {
       if (ContactImpl.valid(to)) {
-        await this.wechaty.puppet.tagContactAdd(this.id, to.id)
+        await this.devchat.puppet.tagContactAdd(this.id, to.id)
       } else if (FavoriteImpl.valid(to)) {
-        // TODO: await this.wechaty.puppet.tagAddFavorite(this.tag, to.id)
+        // TODO: await this.devchat.puppet.tagAddFavorite(this.tag, to.id)
       }
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.error('Tag', 'add() exception: %s', (e as Error).message)
       throw new Error(`add error : ${(e as Error)}`)
     }
@@ -159,7 +159,7 @@ class TagMixin extends MixinBase {
    * Remove this tag from Contact/Favorite
    *
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/Chatie/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/Chatie/devchat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @returns {Promise<void>}
    * @example
@@ -176,12 +176,12 @@ class TagMixin extends MixinBase {
 
     try {
       if (from instanceof ContactImpl) {
-        await this.wechaty.puppet.tagContactRemove(this.id, from.id)
+        await this.devchat.puppet.tagContactRemove(this.id, from.id)
       } else if (from instanceof FavoriteImpl) {
-        // TODO await this.wechaty.puppet.tagRemoveFavorite(this.tag, from.id)
+        // TODO await this.devchat.puppet.tagRemoveFavorite(this.tag, from.id)
       }
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.error('Tag', 'remove() exception: %s', (e as Error).message)
       throw new Error(`remove error : ${e}`)
     }

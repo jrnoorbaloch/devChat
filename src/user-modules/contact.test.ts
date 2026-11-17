@@ -23,7 +23,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 
 import { PuppetMock } from 'wechaty-puppet-mock'
-import { WechatyBuilder } from '../wechaty-builder.ts'
+import { DevChatBuilder } from '../devchat-builder.ts'
 
 import {
   ContactImpl,
@@ -34,26 +34,26 @@ test('findAll()', async t => {
   const EXPECTED_NAME = 'TestingBot'
 
   const puppet = new PuppetMock()
-  const wechaty = WechatyBuilder.build({ puppet })
+  const devchat = DevChatBuilder.build({ puppet })
   let started = false
   t.after(async () => {
     if (started) {
-      await wechaty.stop()
+      await devchat.stop()
     }
   })
 
   const mockContact = puppet.mocker.createContact({ name: EXPECTED_NAME })
 
   started = true
-  await wechaty.start()
+  await devchat.start()
   await puppet.mocker.login(mockContact)
 
-  const contactList = await wechaty.Contact.findAll()
+  const contactList = await devchat.Contact.findAll()
   assert.equal(contactList.length, 1, 'should find 1 contact')
   assert.equal(contactList[0]!.name(), EXPECTED_NAME, 'should get name from payload')
   assert.deepStrictEqual(contactList[0]!.payload, mockContact.payload, 'should get payload from mockContact')
 
-  await wechaty.stop()
+  await devchat.stop()
   started = false
 })
 
@@ -75,9 +75,9 @@ test('should throw when instanciate the global class', async _t => {
 })
 
 test('ProtectedProperties', async _t => {
-  type NotExistInWechaty = Exclude<ContactProtectedProperty, keyof ContactImpl>
-  type NotExistTest = NotExistInWechaty extends never ? true : false
+  type NotExistInDevChat = Exclude<ContactProtectedProperty, keyof ContactImpl>
+  type NotExistTest = NotExistInDevChat extends never ? true : false
 
   const noOneLeft: NotExistTest = true
-  assert.ok(noOneLeft, 'should match Wechaty properties for every protected property')
+  assert.ok(noOneLeft, 'should match DevChat properties for every protected property')
 })

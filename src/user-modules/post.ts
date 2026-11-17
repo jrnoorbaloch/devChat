@@ -20,10 +20,10 @@
  */
 
 /**
- * Issue #2245 - New Wechaty User Module (WUM):
+ * Issue #2245 - New DevChat User Module (WUM):
  *  `Post` for supporting Moments, Channel, Tweet, Weibo, Facebook feeds, etc.
  *
- *  @see https://github.com/wechaty/wechaty/issues/2245#issuecomment-914886835
+ *  @see upstream issue #2245
  */
 import * as PUPPET      from 'wechaty-puppet'
 import { log }          from 'wechaty-puppet'
@@ -34,13 +34,13 @@ import type {
 
 import {
   validationMixin,
-  wechatifyMixinBase,
+  devchatifyMixinBase,
 }                       from '../user-mixins/mod.ts'
 
 import type { Sayable } from '../sayable/mod.ts'
 import {
   sayableToPayload,
-  payloadToSayableWechaty,
+  payloadToSayableDevChat,
 }                       from '../sayable/mod.ts'
 
 import { ContactImpl } from './contact.ts'
@@ -60,7 +60,7 @@ class PostBuilder {
   payload: PUPPET.payloads.PostClient
 
   /**
-   * Wechaty Sayable List
+   * DevChat Sayable List
    */
   sayableList: Sayable[] = []
 
@@ -110,7 +110,7 @@ class PostBuilder {
 
 }
 
-class PostMixin extends wechatifyMixinBase() {
+class PostMixin extends devchatifyMixinBase() {
 
   static builder (): PostBuilder { return PostBuilder.new(this) }
 
@@ -149,7 +149,7 @@ class PostMixin extends wechatifyMixinBase() {
     )
 
     if (filter.id) {
-      const post = this.wechaty.Post.load(filter.id)
+      const post = this.devchat.Post.load(filter.id)
       await post.ready()
       return post
     }
@@ -176,14 +176,14 @@ class PostMixin extends wechatifyMixinBase() {
     const {
       nextPageToken,
       response: postIdList,
-    } = await this.wechaty.puppet.postSearch(
+    } = await this.devchat.puppet.postSearch(
       filter,
       pagination,
     )
 
     const idToPost = async (id: string) =>
-      this.wechaty.Post.find({ id })
-        .catch(e => this.wechaty.emitError(e))
+      this.devchat.Post.find({ id })
+        .catch(e => this.devchat.emitError(e))
 
     /**
      * we need to use concurrencyExecuter to reduce the parallel number of the requests
@@ -245,7 +245,7 @@ class PostMixin extends wechatifyMixinBase() {
     log.silly('Post', 'author()')
 
     if (PUPPET.payloads.isPostClient(this.payload)) {
-      return this.wechaty.currentUser
+      return this.devchat.currentUser
     }
 
     const author = await ContactImpl.find(this.payload.contactId)
@@ -262,7 +262,7 @@ class PostMixin extends wechatifyMixinBase() {
       return undefined
     }
 
-    const post = this.wechaty.Post.load(this.payload.rootId)
+    const post = this.devchat.Post.load(this.payload.rootId)
     await post.ready()
     return post
   }
@@ -273,7 +273,7 @@ class PostMixin extends wechatifyMixinBase() {
       return undefined
     }
 
-    const post = this.wechaty.Post.load(this.payload.parentId)
+    const post = this.devchat.Post.load(this.payload.parentId)
     await post.ready()
     return post
   }
@@ -285,7 +285,7 @@ class PostMixin extends wechatifyMixinBase() {
       throw new Error('no post id found')
     }
 
-    this._payload = await this.wechaty.puppet.postPayload(this.id)
+    this._payload = await this.devchat.puppet.postPayload(this.id)
   }
 
   async ready (): Promise<void> {
@@ -307,7 +307,7 @@ class PostMixin extends wechatifyMixinBase() {
 
     if (PUPPET.payloads.isPostServer(this.payload)) {
       for (const messageId of this.payload.sayableList) {
-        const message = await this.wechaty.Message.find({ id: messageId })
+        const message = await this.devchat.Message.find({ id: messageId })
         if (message) {
           const sayable = await message.toSayable()
           if (sayable) {
@@ -317,7 +317,7 @@ class PostMixin extends wechatifyMixinBase() {
       }
 
     } else {  // client
-      const payloadToSayable = payloadToSayableWechaty(this.wechaty)
+      const payloadToSayable = payloadToSayableDevChat(this.devchat)
       for (const sayablePayload of this.payload.sayableList) {
         const sayable = await payloadToSayable(sayablePayload)
         if (sayable) {
@@ -342,7 +342,7 @@ class PostMixin extends wechatifyMixinBase() {
       parentId: this.id,
     }
 
-    let [ postList, nextPageToken ] = await this.wechaty.Post.findAll(
+    let [ postList, nextPageToken ] = await this.devchat.Post.findAll(
       parentIdFilter,
       pagination,
     )
@@ -355,7 +355,7 @@ class PostMixin extends wechatifyMixinBase() {
         break
       }
 
-      [ postList, nextPageToken ] = await this.wechaty.Post.findAll(
+      [ postList, nextPageToken ] = await this.devchat.Post.findAll(
         parentIdFilter,
         {
           ...pagination,
@@ -425,7 +425,7 @@ class PostMixin extends wechatifyMixinBase() {
       throw new Error('no post id found')
     }
 
-    const builder = this.wechaty.Post.builder()
+    const builder = this.devchat.Post.builder()
 
     if (Array.isArray(sayable)) {
       sayable.forEach(s => builder.add(s))
@@ -437,10 +437,10 @@ class PostMixin extends wechatifyMixinBase() {
       .reply(this)
       .build()
 
-    const postId = await this.wechaty.puppet.postPublish(post.payload)
+    const postId = await this.devchat.puppet.postPublish(post.payload)
 
     if (postId) {
-      const newPost = this.wechaty.Post.load(postId)
+      const newPost = this.devchat.Post.load(postId)
       await newPost.ready()
       return newPost
     }
@@ -485,7 +485,7 @@ class PostMixin extends wechatifyMixinBase() {
       throw new Error('can not tap for post without id')
     }
 
-    return this.wechaty.puppet.tap(this.id, type, status)
+    return this.devchat.puppet.tap(this.id, type, status)
   }
 
   async tapFind (
@@ -504,7 +504,7 @@ class PostMixin extends wechatifyMixinBase() {
     const {
       nextPageToken,
       response,
-    } = await this.wechaty.puppet.tapSearch(
+    } = await this.devchat.puppet.tapSearch(
       this.id,
       filter,
       pagination,
@@ -513,7 +513,7 @@ class PostMixin extends wechatifyMixinBase() {
     const tapList: Tap[] = []
     for (const [ type, data ] of Object.entries(response)) {
       for (const [ i, contactId ] of data.contactId.entries()) {
-        const contact = await this.wechaty.Contact.find({ id: contactId })
+        const contact = await this.devchat.Contact.find({ id: contactId })
         if (!contact) {
           log.warn('Post', 'tapFind() contact not found for id: %s', contactId)
           continue

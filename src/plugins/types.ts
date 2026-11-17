@@ -11,7 +11,7 @@
  * The plugins only need a handful of `Message` methods. Declaring that subset
  * structurally (instead of importing the full `MessageInterface`) keeps the
  * plugin logic decoupled from puppets and lets tests drive it with tiny fake
- * messages. A real devChat/Wechaty `Message` satisfies this interface as-is.
+ * messages. A real devChat/DevChat `Message` satisfies this interface as-is.
  */
 import type { Sayable } from '../sayable/mod.ts'
 

@@ -19,42 +19,47 @@
  *
  */
 
-/**
- * We need to put `Wechaty` at the beginning of this file for import
- * because we have circular dependencies between `Puppet` & `Wechaty`
- */
-export type {
-  WechatyOptions,
-  WechatyInterface as Wechaty,
-}                               from '../wechaty/mod.ts'
-export {
-  WechatyBuilder,
-  type BuilderInterface,
-}                               from '../wechaty-builder.ts'
+// Must stay the first import: see env-bridge.ts.
+import '../env-bridge.ts'
 
 /**
- * devChat brand names.
- *
- * devChat is a fork of Wechaty and stays API-compatible with it, so the
- * `Wechaty*` names above keep working and the ecosystem of
- * `wechaty-puppet-*` providers and plugins can be used unchanged. New code
- * should prefer the `DevChat*` aliases below; they are the same values and
- * types, not wrappers.
+ * We need to put `DevChat` at the beginning of this file for import
+ * because we have circular dependencies between `Puppet` & `DevChat`
  */
+export type {
+  DevChatOptions,
+  DevChatInterface as DevChat,
+}                               from '../devchat/mod.ts'
 export {
-  WechatyBuilder as DevChatBuilder,
-}                               from '../wechaty-builder.ts'
-export type {
-  WechatyOptions as DevChatOptions,
-  WechatyInterface as DevChat,
-}                               from '../wechaty/mod.ts'
-export type {
-  WechatyPlugin as DevChatPlugin,
-  WechatyPluginUninstaller as DevChatPluginUninstaller,
-}                               from '../plugin.ts'
+  DevChatBuilder,
+  type BuilderInterface,
+}                               from '../devchat-builder.ts'
+
 export {
   envSetting,
 }                               from '../config.ts'
+
+/** Setup wizard, multi-messenger runner and messenger registry. */
+export {
+  startDevChat,
+  type StartDevChatOptions,
+}                               from '../setup/runner.ts'
+export {
+  runInit,
+  type InitOptions,
+}                               from '../setup/init.ts'
+export {
+  MESSENGERS,
+  parseMessengerChoice,
+  resolvePuppetAlias,
+  type MessengerId,
+  type MessengerInfo,
+}                               from '../setup/messengers.ts'
+export {
+  readProjectConfig,
+  writeProjectConfig,
+  type DevChatProjectConfig,
+}                               from '../setup/config-file.ts'
 
 /** devChat built-in plugins: CommandRouter, AutoReply and RateLimiter. */
 export *                        from '../plugins/mod.ts'
@@ -84,7 +89,7 @@ export {
 }                         from '../config.ts'
 
 export type {
-  WechatyEventName,
+  DevChatEventName,
 }                             from '../schemas/mod.ts'
 
 export type {
@@ -92,8 +97,8 @@ export type {
   PuppetModuleName, // DEPRECATED
 }                             from '../puppet-config.ts'
 export type {
-  WechatyPlugin,
-  WechatyPluginUninstaller,
+  DevChatPlugin,
+  DevChatPluginUninstaller,
 }                             from '../plugin.ts'
 export type {
   IoClientOptions,

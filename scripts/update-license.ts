@@ -35,7 +35,7 @@ import { promisify }          from 'util'
 import globCallback           from 'glob'
 
 const LICENSE = `/**
- *   Wechaty Chatbot SDK - https://github.com/wechaty/wechaty
+ *   DevChat Chatbot SDK - https://github.com/jrnoorbaloch/devChat
  *
  *   @copyright 2016 Huan LI (李卓桓) <https://github.com/huan>, and
  *                   Wechaty Contributors <https://github.com/wechaty>.

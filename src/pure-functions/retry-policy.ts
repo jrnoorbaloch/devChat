@@ -26,11 +26,11 @@ function getRetryPolicy (): RetryPolicy {
     }),
   })
 
-  policy.onRetry(reason => log.silly('wechaty',
+  policy.onRetry(reason => log.silly('devchat',
     'retry-policy getRetryPolicy policy.onRetry() delay: %s ms',
     reason.delay,
   ))
-  policy.onSuccess(({ duration }) => log.silly('wechaty',
+  policy.onSuccess(({ duration }) => log.silly('devchat',
     'retry-policy getRetryPolicy policy.onSuccess(): retry call ran in %s ms',
     duration,
   ))

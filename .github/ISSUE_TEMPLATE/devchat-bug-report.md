@@ -28,7 +28,7 @@ Answer:
 
 Answer:
 
-> What is your wechaty-puppet-XXX（padchat/puppeteer/） version?
+> Which messenger are you using (WeChat / WhatsApp)? Paste the output of `npm ls --depth=0`.
 
 Answer:
 
@@ -66,7 +66,7 @@ Steps to reproduce the behavior:
 
 ## 6. Full Output Logs
 
-> Set env `WECHATY_LOG=silly` in order to set log level to silly, then we can get the full log (If you dosen't set log env, log level is info as default, we cannot get the full log)
+> Set env `DEVCHAT_LOG=silly` in order to set log level to silly, then we can get the full log (If you dosen't set log env, log level is info as default, we cannot get the full log)
 
 **We need full log instead of log screenshot or log fragments!**
 
@@ -76,7 +76,7 @@ Show Logs
 </summary>
 
 ```shell
-$ WECHATY_LOG=silly node yourbot.js
+$ DEVCHAT_LOG=silly node yourbot.js
 
 -> Make sure to copy/paste the full (instead of only fragments) log message in text format (instead of image/screenshot) at here
 

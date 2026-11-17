@@ -26,7 +26,7 @@ const contributeMap: {
 } = {}
 
 function parseLine (line: string): string[] | null {
-  // [\#264](https://github.com/wechaty/wechaty/pull/264) ([lijiarui](https://github.com/lijiarui))
+  // [\#264](upstream issue #264) ([lijiarui](https://github.com/lijiarui))
   // const regex = /(\[\\#\d+\]\([^\)]+\))\s+(\(\[[^]]+\]\([^)]+\)))/i
   const regex = /(\[\\#\d+\])(\([^)]+\))\s+\((\[[^\]]+\]\([^)]+\))/
   const matches = regex.exec(line)
@@ -35,7 +35,7 @@ function parseLine (line: string): string[] | null {
   }
   // console.info('match!')
   // console.info(matches[1])  // [\#264]
-  // console.info(matches[2])  // (https://github.com/wechaty/wechaty/pull/264)
+  // console.info(matches[2])  // (upstream issue #264)
   // console.info(matches[3])  // ([lijiarui](https://github.com/lijiarui)
   return matches
 }
@@ -78,7 +78,7 @@ function outputContributorMd () {
     '',
     '# CHANGELOG',
     '',
-    '## WECHATY CONTRIBUTORS',
+    '## DEVCHAT CONTRIBUTORS',
     '### Active Contributors',
     '',
   ].join('\n'))

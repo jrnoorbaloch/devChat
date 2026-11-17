@@ -6,9 +6,9 @@ import {
   poolifyMixin,
 }                       from './poolify.ts'
 import {
-  wechatifyUserModule,
-  wechatifyMixin,
-}                       from './wechatify.ts'
+  devchatifyUserModule,
+  devchatifyMixin,
+}                       from './devchatify.ts'
 
 type AssertEqual<Actual, Expected> =
   (<Value>() => Value extends Actual ? 1 : 2) extends
@@ -57,7 +57,7 @@ test('poolifyMixin() pool', async _t => {
 
   }
 
-  class UserClassTest extends wechatifyMixin(
+  class UserClassTest extends devchatifyMixin(
     poolifyMixin(Life)<UserClassTest>(),
   ) {
 
@@ -66,8 +66,8 @@ test('poolifyMixin() pool', async _t => {
 
   }
 
-  const UserClass1 = wechatifyUserModule(UserClassTest)({} as any)
-  const UserClass2 = wechatifyUserModule(UserClassTest)({} as any)
+  const UserClass1 = devchatifyUserModule(UserClassTest)({} as any)
+  const UserClass2 = devchatifyUserModule(UserClassTest)({} as any)
 
   assert.equal(UserClass1.pool.size, 0, 'should be size 0 for class 1')
   assert.equal(UserClass2.pool.size, 0, 'should be size 0 for class 2')
@@ -83,7 +83,7 @@ test('poolifyMixin() pool', async _t => {
 
 test('static findAll()', async _t => {
 
-  class UserClassTest extends wechatifyMixin(
+  class UserClassTest extends devchatifyMixin(
     poolifyMixin(Object)<UserClassTest>(),
   ) {
 

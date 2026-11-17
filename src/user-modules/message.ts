@@ -42,8 +42,8 @@ import {
 }                             from '../sayable/mod.ts'
 
 import {
-  wechatifyMixin,
-}                       from '../user-mixins/wechatify.ts'
+  devchatifyMixin,
+}                       from '../user-mixins/devchatify.ts'
 
 import type {
   ContactInterface,
@@ -74,14 +74,14 @@ import {
 import { validationMixin } from '../user-mixins/validation.ts'
 import type { ContactSelfImpl } from './contact-self.ts'
 
-const MixinBase = wechatifyMixin(
+const MixinBase = devchatifyMixin(
   EventEmitter,
 )
 
 /**
  * All wechat messages will be encapsulated as a Message.
  *
- * [Examples/Ding-Dong-Bot]{@link https://github.com/wechaty/wechaty/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/ding-dong-bot.ts}
+ * [Examples/Ding-Dong-Bot]{@link https://github.com/jrnoorbaloch/devChat/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/ding-dong-bot.ts}
  */
 class MessageMixin extends MixinBase implements SayableSayer {
 
@@ -135,7 +135,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
     const invalidDict: { [id: string]: true } = {}
 
     try {
-      const MessageIdList = await this.wechaty.puppet.messageSearch(query)
+      const MessageIdList = await this.devchat.puppet.messageSearch(query)
       const messageList = MessageIdList.map(id => this.load(id))
       await Promise.all(
         messageList.map(
@@ -150,7 +150,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
       return messageList.filter(message => !invalidDict[message.id])
 
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.warn('Message', 'findAll() rejected: %s', (e as Error).message)
       return [] // fail safe
     }
@@ -251,7 +251,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    * Get the talker of a message.
    * @returns {ContactInterface}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   const talker = msg.talker()
@@ -282,23 +282,23 @@ class MessageMixin extends MixinBase implements SayableSayer {
         throw new Error('no talkerId found for talker')
       }
 
-      log.warn('Message', 'talker() payload.talkerId not exist! See: https://github.com/wechaty/puppet/issues/187')
-      console.error('Puppet: %s@%s', this.wechaty.puppet.name(), this.wechaty.puppet.version())
+      log.warn('Message', 'talker() payload.talkerId not exist! See: upstream puppet issue #187')
+      console.error('Puppet: %s@%s', this.devchat.puppet.name(), this.devchat.puppet.version())
       console.error(new Error().stack)
     }
 
     let talker
-    if (this.wechaty.isLoggedIn && talkerId === this.wechaty.puppet.currentUserId) {
-      talker = (this.wechaty.ContactSelf as typeof ContactSelfImpl).load(talkerId)
+    if (this.devchat.isLoggedIn && talkerId === this.devchat.puppet.currentUserId) {
+      talker = (this.devchat.ContactSelf as typeof ContactSelfImpl).load(talkerId)
     } else {
-      talker = (this.wechaty.Contact as typeof ContactImpl).load(talkerId)
+      talker = (this.devchat.Contact as typeof ContactImpl).load(talkerId)
     }
     return talker
   }
 
   /**
    * @depreacated Use `message.talker()` to replace `message.from()`
-   *  https://github.com/wechaty/wechaty/issues/2094
+   *  upstream issue #2094
    */
   from (): undefined | ContactInterface {
     log.warn('Message', 'from() is deprecated, use talker() instead. Call stack: %s',
@@ -307,7 +307,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
     try {
       return this.talker()
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       return undefined
     }
   }
@@ -343,8 +343,8 @@ class MessageMixin extends MixinBase implements SayableSayer {
        */
       listenerId = this.payload.toId
 
-      log.warn('Message', 'listener() payload.listenerId should be set! See: https://github.com/wechaty/puppet/issues/187')
-      console.error('Puppet: %s@%s', this.wechaty.puppet.name(), this.wechaty.puppet.version())
+      log.warn('Message', 'listener() payload.listenerId should be set! See: upstream puppet issue #187')
+      console.error('Puppet: %s@%s', this.devchat.puppet.name(), this.devchat.puppet.version())
       console.error(new Error().stack)
     }
 
@@ -353,10 +353,10 @@ class MessageMixin extends MixinBase implements SayableSayer {
     }
 
     let listener
-    if (listenerId === this.wechaty.puppet.currentUserId) {
-      listener = (this.wechaty.ContactSelf as typeof ContactSelfImpl).load(listenerId)
+    if (listenerId === this.devchat.puppet.currentUserId) {
+      listener = (this.devchat.ContactSelf as typeof ContactSelfImpl).load(listenerId)
     } else {
-      listener = (this.wechaty.Contact as typeof ContactImpl).load(listenerId)
+      listener = (this.devchat.Contact as typeof ContactImpl).load(listenerId)
     }
     return listener
   }
@@ -367,7 +367,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    *
    * @returns {(RoomInterface | null)}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   const contact = msg.from()
@@ -391,7 +391,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
       return undefined
     }
 
-    const room = (this.wechaty.Room as typeof RoomImpl).load(roomId)
+    const room = (this.devchat.Room as typeof RoomImpl).load(roomId)
     return room
   }
 
@@ -400,7 +400,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    *
    * @returns {string}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   const contact = msg.from()
@@ -427,7 +427,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    * Get the recalled message
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   if (m.type() === PUPPET.types.Message.Recalled) {
@@ -450,13 +450,13 @@ class MessageMixin extends MixinBase implements SayableSayer {
       throw new Error('Can not find recalled message')
     }
     try {
-      const message = await this.wechaty.Message.find({ id: originalMessageId })
+      const message = await this.devchat.Message.find({ id: originalMessageId })
       if (message) {
         return message
       }
 
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.verbose(`Can not retrieve the recalled message with id ${originalMessageId}.`)
     }
     return undefined
@@ -465,9 +465,9 @@ class MessageMixin extends MixinBase implements SayableSayer {
   /**
    * Reply a Text or Media File message to the sender.
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    *
-   * @see {@link https://github.com/wechaty/wechaty/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/ding-dong-bot.ts|Examples/ding-dong-bot}
+   * @see {@link https://github.com/jrnoorbaloch/devChat/blob/1523c5e02be46ebe2cc172a744b2fbe53351540e/examples/ding-dong-bot.ts|Examples/ding-dong-bot}
    * @param {(string | ContactInterface | FileBox | UrlLinkInterface | MiniProgramInterface | LocationInterface)} textOrContactOrFile
    * send text, Contact, or file to bot. </br>
    * You can use {@link https://www.npmjs.com/package/file-box|FileBox} to send file
@@ -477,14 +477,14 @@ class MessageMixin extends MixinBase implements SayableSayer {
    *
    * @example
    * import { FileBox }  from 'file-box'
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *
    * // 1. send Image
    *
    *   if (/^ding$/i.test(m.text())) {
-   *     const fileBox = FileBox.fromUrl('https://wechaty.github.io/wechaty/images/bot-qr-code.png')
+   *     const fileBox = FileBox.fromUrl('https://devchat-docs.vercel.app/assets/og.png')
    *     await msg.say(fileBox)
    *     const message = await msg.say(fileBox) // only supported by puppet-padplus
    *   }
@@ -514,8 +514,8 @@ class MessageMixin extends MixinBase implements SayableSayer {
    *     const linkPayload = new UrlLink ({
    *       description : 'WeChat Bot SDK for Individual Account, Powered by TypeScript, Docker, and Love',
    *       thumbnailUrl: 'https://avatars0.githubusercontent.com/u/25162437?s=200&v=4',
-   *       title       : 'Welcome to Wechaty',
-   *       url         : 'https://github.com/wechaty/wechaty',
+   *       title       : 'Welcome to DevChat',
+   *       url         : 'https://github.com/jrnoorbaloch/devChat',
    *     })
    *     await msg.say(linkPayload)
    *     const message = await msg.say(linkPayload) // only supported by puppet-padplus
@@ -572,7 +572,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    * @returns {Promise<boolean>}
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
    *   const recallMessage = await msg.say('123')
@@ -584,7 +584,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
 
   async recall (): Promise<boolean> {
     log.verbose('Message', 'recall()')
-    const isSuccess = await this.wechaty.puppet.messageRecall(this.id)
+    const isSuccess = await this.devchat.puppet.messageRecall(this.id)
     return isSuccess
   }
 
@@ -603,7 +603,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    * @returns {PUPPET.types.Message}
    *
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * if (message.type() === bot.Message.Type.Text) {
    *   console.log('This is a text message')
    * }
@@ -628,9 +628,9 @@ class MessageMixin extends MixinBase implements SayableSayer {
     try {
       const talker = this.talker()
 
-      return talker.id === this.wechaty.puppet.currentUserId
+      return talker.id === this.devchat.puppet.currentUserId
     } catch (e) {
-      this.wechaty.emitError(e)
+      this.devchat.emitError(e)
       log.error('Message', 'self() rejection: %s', (e as Error).message)
       return false
     }
@@ -670,7 +670,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
         && 'mentionIdList' in this.payload
         && Array.isArray(this.payload.mentionIdList)
     ) {
-      const idToContact = (id: string) => this.wechaty.Contact.find({ id })
+      const idToContact = (id: string) => this.devchat.Contact.find({ id })
       const allContact = await Promise.all(
         this.payload.mentionIdList
           .map(idToContact),
@@ -786,7 +786,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    * }
    */
   async mentionSelf (): Promise<boolean> {
-    const currentUserId = this.wechaty.puppet.currentUserId
+    const currentUserId = this.devchat.puppet.currentUserId
     const mentionList = await this.mentionList()
     return mentionList.some(contact => contact.id === currentUserId)
   }
@@ -808,7 +808,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
       return
     }
 
-    this.payload = await this.wechaty.puppet.messagePayload(this.id)
+    this.payload = await this.devchat.puppet.messagePayload(this.id)
 
     let talkerId = this.payload.talkerId
     if (!talkerId) {
@@ -821,8 +821,8 @@ class MessageMixin extends MixinBase implements SayableSayer {
         throw new Error('no talkerId found for talker')
       }
 
-      log.warn('Message', 'ready() payload.talkerId not exist! See: https://github.com/wechaty/puppet/issues/187')
-      console.error('Puppet: %s@%s', this.wechaty.puppet.name(), this.wechaty.puppet.version())
+      log.warn('Message', 'ready() payload.talkerId not exist! See: upstream puppet issue #187')
+      console.error('Puppet: %s@%s', this.devchat.puppet.name(), this.devchat.puppet.version())
       console.error(new Error().stack)
     }
 
@@ -835,19 +835,19 @@ class MessageMixin extends MixinBase implements SayableSayer {
        */
       listenerId = this.payload.toId
 
-      log.warn('Message', 'ready() payload.listenerId should be set! See: https://github.com/wechaty/puppet/issues/187')
-      console.error('Puppet: %s@%s', this.wechaty.puppet.name(), this.wechaty.puppet.version())
+      log.warn('Message', 'ready() payload.listenerId should be set! See: upstream puppet issue #187')
+      console.error('Puppet: %s@%s', this.devchat.puppet.name(), this.devchat.puppet.version())
       console.error(new Error().stack)
     }
 
     if (roomId) {
-      await this.wechaty.Room.find({ id: roomId })
+      await this.devchat.Room.find({ id: roomId })
     }
     if (talkerId) {
-      await this.wechaty.Contact.find({ id: talkerId })
+      await this.devchat.Contact.find({ id: talkerId })
     }
     if (listenerId) {
-      await this.wechaty.Contact.find({ id: listenerId })
+      await this.devchat.Contact.find({ id: listenerId })
     }
   }
 
@@ -893,13 +893,13 @@ class MessageMixin extends MixinBase implements SayableSayer {
    * The recipient of the message, the room, or the contact
    * @returns {Promise<void>}
    * @example
-   * const bot = WechatyBuilder.build()
+   * const bot = DevChatBuilder.build()
    * bot
    * .on('message', async m => {
-   *   const room = await bot.Room.find({topic: 'wechaty'})
+   *   const room = await bot.Room.find({topic: 'devchat'})
    *   if (room) {
    *     await m.forward(room)
-   *     console.log('forward this message to wechaty room!')
+   *     console.log('forward this message to devchat room!')
    *   }
    * })
    * .start()
@@ -911,12 +911,12 @@ class MessageMixin extends MixinBase implements SayableSayer {
     // let contactId
 
     try {
-      const msgId = await this.wechaty.puppet.messageForward(
+      const msgId = await this.devchat.puppet.messageForward(
         to.id,
         this.id,
       )
       if (msgId) {
-        const msg = await this.wechaty.Message.find({ id: msgId })
+        const msg = await this.devchat.Message.find({ id: msgId })
         return msg
       }
     } catch (e) {
@@ -941,7 +941,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
    * Returns the message age in seconds. <br>
    *
    * For example, the message is sent at time `8:43:01`,
-   * and when we received it in Wechaty, the time is `8:43:15`,
+   * and when we received it in DevChat, the time is `8:43:15`,
    * then the age() will return `8:43:15 - 8:43:01 = 14 (seconds)`
    *
    * @returns {number} message age in seconds.
@@ -955,7 +955,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
   /**
    * Extract the Media File from the Message, and put it into the FileBox.
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @returns {Promise<FileBoxInterface>}
    *
@@ -969,14 +969,14 @@ class MessageMixin extends MixinBase implements SayableSayer {
     if (this.type() === PUPPET.types.Message.Text) {
       throw new Error('text message no file')
     }
-    const fileBox = await this.wechaty.puppet.messageFile(this.id)
+    const fileBox = await this.devchat.puppet.messageFile(this.id)
     return fileBox
   }
 
   /**
    * Extract the Image File from the Message, so that we can use different image sizes.
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    *
    * @returns {ImageInterface}
    *
@@ -991,14 +991,14 @@ class MessageMixin extends MixinBase implements SayableSayer {
     if (this.type() !== PUPPET.types.Message.Image) {
       throw new Error(`not a image type message. type: ${this.type()}`)
     }
-    return this.wechaty.Image.create(this.id)
+    return this.devchat.Image.create(this.id)
   }
 
   /**
    * Get Share Card of the Message
    * Extract the Contact Card from the Message, and encapsulate it into Contact class
    * > Tips:
-   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/wechaty/wechaty/wiki/Puppet#3-puppet-compatible-table)
+   * This function is depending on the Puppet Implementation, see [puppet-compatible-table](https://github.com/jrnoorbaloch/devChat/wiki/Puppet#3-puppet-compatible-table)
    * @returns {Promise<ContactInterface>}
    */
   async toContact (): Promise<ContactInterface> {
@@ -1008,13 +1008,13 @@ class MessageMixin extends MixinBase implements SayableSayer {
       throw new Error('message not a ShareCard')
     }
 
-    const contactId = await this.wechaty.puppet.messageContact(this.id)
+    const contactId = await this.devchat.puppet.messageContact(this.id)
 
     if (!contactId) {
       throw new Error(`can not get Contact id by message: ${contactId}`)
     }
 
-    const contact = await this.wechaty.Contact.find({ id: contactId })
+    const contact = await this.devchat.Contact.find({ id: contactId })
     if (!contact) {
       throw new Error(`can not get Contact payload by from id: ${contactId}`)
     }
@@ -1033,9 +1033,9 @@ class MessageMixin extends MixinBase implements SayableSayer {
       throw new Error('message not a Url Link')
     }
 
-    const urlPayload = await this.wechaty.puppet.messageUrl(this.id)
+    const urlPayload = await this.devchat.puppet.messageUrl(this.id)
 
-    return new this.wechaty.UrlLink(urlPayload)
+    return new this.devchat.UrlLink(urlPayload)
   }
 
   async toMiniProgram (): Promise<MiniProgramInterface> {
@@ -1049,9 +1049,9 @@ class MessageMixin extends MixinBase implements SayableSayer {
       throw new Error('message not a MiniProgram')
     }
 
-    const miniProgramPayload = await this.wechaty.puppet.messageMiniProgram(this.id)
+    const miniProgramPayload = await this.devchat.puppet.messageMiniProgram(this.id)
 
-    return new this.wechaty.MiniProgram(miniProgramPayload)
+    return new this.devchat.MiniProgram(miniProgramPayload)
   }
 
   async toLocation (): Promise<LocationInterface> {
@@ -1065,7 +1065,7 @@ class MessageMixin extends MixinBase implements SayableSayer {
       throw new Error('message not a Location')
     }
 
-    const locationPayload = await this.wechaty.puppet.messageLocation(this.id)
+    const locationPayload = await this.devchat.puppet.messageLocation(this.id)
 
     return new LocationImpl(locationPayload)
   }

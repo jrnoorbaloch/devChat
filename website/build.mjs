@@ -72,7 +72,7 @@ function jsonLd (page) {
         programmingLanguage: 'TypeScript',
         runtimePlatform: 'Node.js',
         license: 'https://www.apache.org/licenses/LICENSE-2.0',
-        keywords: 'chatbot SDK, TypeScript chatbot, bot framework, RPA, WeChat bot, WhatsApp bot, Wechaty fork',
+        keywords: 'chatbot SDK, TypeScript chatbot, bot framework, RPA, WeChat bot, WhatsApp bot',
       }
     : {
         '@context': 'https://schema.org',
@@ -115,7 +115,7 @@ function layout (page) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${esc(fullTitle)}</title>
   <meta name="description" content="${esc(page.description)}">
-  <meta name="keywords" content="devChat, chatbot SDK, TypeScript chatbot framework, Node.js bot, RPA, WeChat bot, WhatsApp bot, WeCom bot, Lark bot, Wechaty alternative, command router, auto reply bot">
+  <meta name="keywords" content="devChat, chatbot SDK, TypeScript chatbot framework, Node.js bot, RPA, WeChat bot, WhatsApp bot, WeCom bot, Lark bot, command router, auto reply bot">
   <meta name="author" content="jrnoorbaloch">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="theme-color" content="#0b0f14">
@@ -166,7 +166,7 @@ ${page.body}
       </main>
     </div>`}
   <footer class="footer">
-    <p>devChat is open source under the <a href="${REPO_URL}/blob/main/LICENSE">Apache-2.0 license</a>. It is a fork of <a href="https://github.com/wechaty/wechaty" rel="noopener">Wechaty</a> by Huan Li and the Wechaty contributors.</p>
+    <p>devChat is open source under the <a href="${REPO_URL}/blob/main/LICENSE">Apache-2.0 license</a> · <a href="${REPO_URL}/blob/main/NOTICE">Credits &amp; notices</a></p>
   </footer>
   <script src="/assets/site.js" defer></script>
 </body>
@@ -177,6 +177,8 @@ ${page.body}
 rmSync(OUT, { force: true, recursive: true })
 mkdirSync(OUT, { recursive: true })
 cpSync(join(ROOT, 'assets'), join(OUT, 'assets'), { recursive: true })
+// Standalone pages copied as-is (no layout), e.g. the login QR page.
+cpSync(join(ROOT, 'static'), OUT, { recursive: true })
 
 for (const page of pages) {
   const file = page.slug === 'index' ? 'index.html' : `${page.slug}.html`

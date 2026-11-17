@@ -1,19 +1,19 @@
 #!/usr/bin/env bats
 
 function dockerRun() {
-  docker run --rm -v "$(pwd)":/bot ${IMAGE_NAME:-'wechaty/wechaty:artifact'} $@
+  docker run --rm -v "$(pwd)":/bot ${IMAGE_NAME:-'jrnoorbaloch/devchat:artifact'} $@
 }
 
 fixtures=tests/fixtures/docker
 
-@test "should resolve Wechaty to the image's built package" {
-  run docker run --rm --entrypoint node "${IMAGE_NAME:-wechaty/wechaty:artifact}" \
-    --input-type=module -e "console.log(import.meta.resolve('wechaty'))"
+@test "should resolve DevChat to the image's built package" {
+  run docker run --rm --entrypoint node "${IMAGE_NAME:-jrnoorbaloch/devchat:artifact}" \
+    --input-type=module -e "console.log(import.meta.resolve('devchat'))"
   [ "$status" -eq 0 ]
-  [ "$output" = "file:///wechaty/dist/esm/src/mods/mod.js" ]
+  [ "$output" = "file:///devchat/dist/esm/src/mods/mod.js" ]
 }
 
-@test "should fail when using require to load ESM-only Wechaty" {
+@test "should fail when using require to load ESM-only DevChat" {
   cd "$fixtures"
   run dockerRun cjs/js-bot.js
   [ "$status" -ne 0 ]
@@ -97,11 +97,11 @@ fixtures=tests/fixtures/docker
 @test "should execute ONBUILD instructions" {
   [ -n "${ONBUILD_IMAGE:-}" ] || skip "ONBUILD_IMAGE is only set for publish candidates"
 
-  local smoke_image="wechaty/onbuild-smoke:${RANDOM}"
+  local smoke_image="devchat/onbuild-smoke:${RANDOM}"
   local fixture="${BATS_TEST_DIRNAME}/fixtures/docker/onbuild-app"
 
   run docker build \
-    --build-arg "WECHATY_BASE=$ONBUILD_IMAGE" \
+    --build-arg "DEVCHAT_BASE=$ONBUILD_IMAGE" \
     --tag "$smoke_image" \
     -f "$fixture/Dockerfile" \
     "$fixture"

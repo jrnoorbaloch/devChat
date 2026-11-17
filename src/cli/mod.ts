@@ -1,4 +1,5 @@
 export { friday }     from './friday.ts'
+export { init }       from './init.ts'
 export { gateway }    from './gateway.ts'
 export { provider }   from './provider.ts'
 export { service }    from './service.ts'

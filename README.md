@@ -1,20 +1,20 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <p align="center">
-  <img src="website/assets/og.png" alt="devChat – open-source TypeScript chatbot SDK for WeChat, WhatsApp, WeCom and Lark" width="720">
+  <img src="website/assets/og.png" alt="devChat – open-source TypeScript chatbot SDK for WeChat and WhatsApp" width="720">
 </p>
 
 <h1 align="center">devChat</h1>
 
 <p align="center">
-  <b>Open-source TypeScript chatbot SDK and bot framework for Node.js.</b><br>
-  Build bots for WeChat, WhatsApp, WeCom, Lark and more with one API, plus built-in slash commands, auto-replies and rate limiting.
+  <b>Open-source TypeScript chatbot SDK for Node.js.</b><br>
+  Install with one command, choose WeChat, WhatsApp or both, and get slash commands, auto-replies and rate limiting built in.
 </p>
 
 <p align="center">
   <a href="https://devchat-docs.vercel.app"><b>Documentation</b></a> ·
   <a href="https://devchat-docs.vercel.app/getting-started">Getting started</a> ·
   <a href="https://devchat-docs.vercel.app/plugins">Plugins</a> ·
-  <a href="https://devchat-docs.vercel.app/api">API</a>
+  <a href="https://devchat-docs.vercel.app/troubleshooting">Troubleshooting</a>
 </p>
 
 <p align="center">
@@ -26,121 +26,111 @@
 
 ---
 
-## What is devChat?
+## Install in one command
 
-**devChat** is a developer-first **chatbot SDK** and **RPA (robotic process automation) framework** written in **TypeScript**. You write your bot logic once, against one clean API. Then you choose which messenger it runs on (WeChat, WhatsApp, WeCom/WXWork, Lark/Feishu, QQ, Gitter and more) by changing a single setting.
+**Windows (PowerShell):**
 
+```powershell
+irm https://raw.githubusercontent.com/jrnoorbaloch/devChat/main/install.ps1 | iex
+```
 
-- 🧭 **`CommandRouter`**: `/slash` commands with quoted arguments, aliases, an automatic `/help`, and error isolation.
-- 💬 **`AutoReply`**: declarative keyword, RegExp and function rules for FAQ, support and greeter bots.
-- 🚦 **`RateLimiter`**: per-user sliding-window throttling that protects your bot account from floods and bans.
-- ⚙️ **`DEVCHAT_*` environment variables**, with full backward compatibility for `WECHATY_*`.
-- 🏷️ **`DevChatBuilder` / `DevChat` / `DevChatPlugin`** brand names. Every `Wechaty*` export still works.
+**macOS / Linux:**
 
-## Quick start
+```sh
+curl -fsSL https://raw.githubusercontent.com/jrnoorbaloch/devChat/main/install.sh | bash
+```
 
-Requirements: **Node.js 26+** and **npm 10+**.
+The installer checks Git, Node.js 26+ and npm. If something is missing it offers to install it, and it always asks first. Then it downloads devChat, installs the dependencies, and asks:
+
+```text
+Which messenger do you want your bot to use?
+  1) WeChat
+  2) WhatsApp
+  3) Both
+```
+
+Only what you choose gets installed. WhatsApp's headless Chrome is skipped if you pick WeChat only. Then:
+
+```sh
+cd devChat
+npm start        # scan the QR code with your phone, then send /help to the bot
+```
+
+Something went wrong? Every error prints its fix, and the
+[troubleshooting guide](https://devchat-docs.vercel.app/troubleshooting) has the rest.
+
+## Your bot in 20 lines
+
+`npm run setup` creates `bot.ts`. The same code runs on every messenger you picked:
+
+```ts
+import { startDevChat, CommandRouter, AutoReply } from 'devchat'
+
+await startDevChat({
+  setup: (bot, messenger) => {
+    bot.use(
+      CommandRouter({
+        commands: {
+          ping: () => 'pong',
+          echo: { description: 'Repeat text', aliases: ['say'], handler: ({ rawArgs }) => rawArgs },
+        },
+        rateLimit: { limit: 10, intervalMs: 60_000 },
+        requireMentionInRoom: true,
+      }),
+      AutoReply({
+        rules: [
+          { match: 'hi', reply: 'Hello! 👋 Type /help' },
+          { match: /weather in (\w+)/i, reply: (_msg, m) => `Checking weather for ${m?.[1]}…` },
+        ],
+      }),
+    )
+    bot.on('message', m => console.log(`[${messenger}] ${m.text()}`))
+  },
+})
+```
+
+## Features
+
+- 🚀 **One-line install** with a setup wizard: WeChat, WhatsApp or both.
+- 🔀 **Several messengers, one codebase:** `startDevChat()` runs a bot per messenger, and one failing messenger never stops the others.
+- 🧭 **`CommandRouter`:** `/slash` commands with quoted arguments, aliases, an automatic `/help`, and error isolation.
+- 💬 **`AutoReply`:** keyword, RegExp and function rules for FAQ, support and greeter bots.
+- 🚦 **`RateLimiter`:** per-user throttling that protects your bot account.
+- 📱 **QR login in the terminal**, plus a browser link that draws the code locally.
+- 🛡️ **Errors you can act on:** setup and start print a fix, not a stack trace (`DEVCHAT_DEBUG=1` shows details).
+- 🧪 **Testable without a phone** using the mock driver.
+
+## For developers
 
 ```sh
 git clone https://github.com/jrnoorbaloch/devChat.git
 cd devChat
-npm install
-npm run demo:commands   # scan the QR code, then send /help to your bot
+npm ci
+npm run setup -- --messenger whatsapp --yes   # no questions (CI / Docker)
+npm test                                      # lint + typecheck + unit tests
 ```
 
-## A useful bot in 20 lines
-
-```ts
-import { DevChatBuilder, CommandRouter, AutoReply } from 'devchat'
-
-const bot = DevChatBuilder.build({ name: 'my-bot' })
-
-bot.use(
-  CommandRouter({
-    commands: {
-      ping: () => 'pong',
-      echo: { description: 'Repeat text', aliases: ['say'], handler: ({ rawArgs }) => rawArgs },
-    },
-    rateLimit: { limit: 10, intervalMs: 60_000 },
-    requireMentionInRoom: true,
-  }),
-  AutoReply({
-    rules: [
-      { match: 'hi', reply: 'Hello! 👋 Type /help' },
-      { match: /weather in (\w+)/i, reply: (_msg, m) => `Checking weather for ${m?.[1]}…` },
-    ],
-  }),
-)
-
-bot.on('scan', qrcode => console.log('Scan to log in:', qrcode))
-await bot.start()
-```
-
-Run it with your messenger of choice:
-
-```sh
-DEVCHAT_PUPPET=wechaty-puppet-whatsapp node bot.ts
-```
-
-## Supported messengers
-
-devChat connects to messengers through interchangeable **puppet providers**:
-
-| Messenger | Puppet |
-| --- | --- |
-| WeChat (default, web protocol) | `wechaty-puppet-wechat4u` |
-| WeChat (browser / iPad) | `wechaty-puppet-wechat`, `wechaty-puppet-padlocal` |
-| WhatsApp | `wechaty-puppet-whatsapp` |
-| Lark / Feishu | `wechaty-puppet-lark` |
-| QQ | `wechaty-puppet-oicq` |
-| Gitter | `wechaty-puppet-gitter` |
-| WeChat Official Account | `wechaty-puppet-official-account` |
-| Remote service / testing | `wechaty-puppet-service`, `wechaty-puppet-mock` |
-
-## Documentation
-
-The full documentation lives at **<https://devchat-docs.vercel.app>**:
-
-- [Getting started](https://devchat-docs.vercel.app/getting-started): install the SDK, run your first bot, and learn the bot lifecycle
-- [Built-in plugins](https://devchat-docs.vercel.app/plugins): `CommandRouter`, `AutoReply`, `RateLimiter`, and writing your own plugin
-- [Configuration](https://devchat-docs.vercel.app/configuration): environment variables, puppets and Docker
-- [API reference](https://devchat-docs.vercel.app/api): the bot, events, `Message`, `Contact` and `Room`
-- [Migrating from Wechaty](https://devchat-docs.vercel.app/migration)
-- [FAQ](https://devchat-docs.vercel.app/faq)
-
-The site source is in [`website/`](website/). Build it with `node website/build.mjs`.
-
-## Development
-
-```sh
-npm install
-npm test            # lint + typecheck + unit tests
-npm run test:unit   # unit tests only (node:test)
-npm run dist        # compile to dist/
-```
-
-The project layout:
+A plain `npm install` never prompts and never downloads extra drivers. Setup is a separate, explicit step.
 
 ```text
-src/            SDK source (TypeScript, run directly by Node.js)
-src/plugins/    devChat built-in plugins: CommandRouter, AutoReply, RateLimiter
-bin/            CLI: devchat, devchat-doctor, devchat-version, ...
-examples/       ding-dong-bot.ts, command-bot.ts
-website/        documentation site (static, deployed to Vercel)
+src/              SDK source (TypeScript, run directly by Node.js 26+)
+src/setup/        setup wizard, multi-messenger runner, messenger registry
+src/plugins/      CommandRouter, AutoReply, RateLimiter
+bin/              CLI: devchat, devchat-init, devchat-doctor, ...
+install.sh / .ps1 one-line installers
+website/          documentation site (deployed to Vercel)
 ```
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+See [DEVELOPMENT.md](DEVELOPMENT.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Contributing
+## Important: account safety
 
-Issues and pull requests are welcome! Please run `npm test` before opening a PR. If you like the project, a ⭐ helps others find it.
+WhatsApp support uses WhatsApp Web, not the official WhatsApp Business API, and WeChat support uses the web protocol. Messengers may restrict automated accounts. Use a test number, keep rate limits on, and never mass-message people.
 
 ## License and credits
 
-devChat is licensed under the [Apache License 2.0](LICENSE).
-
-devChat is a fork of **[Wechaty](https://github.com/wechaty/wechaty)**, created by [Huan Li](https://github.com/huan) and the Wechaty community. All original copyright notices are kept, and the [NOTICE](NOTICE) file records the attribution. Thank you to every Wechaty contributor. The full upstream history is in [CHANGELOG.md](CHANGELOG.md).
+devChat is open source under the [Apache License 2.0](LICENSE). Third-party credits and notices are listed in [NOTICE](NOTICE).
 
 ---
 
-**Keywords:** chatbot SDK, TypeScript chatbot framework, Node.js bot framework, WeChat bot, WhatsApp bot, WeCom bot, Lark bot, RPA, conversational AI, slash commands, auto reply bot, rate limiter, Wechaty alternative.
+**Keywords:** chatbot SDK, TypeScript chatbot framework, Node.js bot, WhatsApp bot, WeChat bot, one-line install, RPA, conversational AI, slash commands, auto reply bot, rate limiter.

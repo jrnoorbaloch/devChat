@@ -29,16 +29,16 @@ const OFFICIAL_PUPPET_DEPENDENCIES = {
 
   /**
    * Deprecated History:
-   *  https://github.com/wechaty/puppet-service-providers/issues/11
+   *  upstream puppet-service-providers issue #11
    */
   // Dec 2020
-  //  - https://github.com/wechaty/puppet-services/issues/61
+  //  - upstream puppet-services issue #61
   //    'wechaty-puppet-padplus'   : '^0.7.30',   // https://www.npmjs.com/package/wechaty-puppet-padplus
   // Sep 2021:
   //    'wechaty-puppet-hostie'    : '*',       // https://www.npmjs.com/package/wechaty-puppet-hostie
 
   /**
-   * Wechaty Internal Puppets: dependency by package.json
+   * DevChat Internal Puppets: dependency by package.json
    *
    *  Huan(202108): DO NOT REMOVE THE SPECIFIC VERSIONS BELOW
    *    All the internal puppets which have already depended in package.json

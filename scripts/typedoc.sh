@@ -10,6 +10,6 @@ typedoc \
   --mode modules \
   --module nodenext \
   --target ES6 \
-  --name "Wechaty Documentation" \
+  --name "DevChat Documentation" \
   --out dist/docs/ \
   src/

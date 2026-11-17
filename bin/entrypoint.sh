@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 #
-# Wechaty - Connect ChatBots
+# DevChat - Connect ChatBots
 #
-# https://github.com/wechaty/wechaty
+# https://github.com/jrnoorbaloch/devChat
 #
 set -e
 
 export HOME=/bot
-export PATH=$PATH:/wechaty/bin:/wechaty/node_modules/.bin
+export PATH=$PATH:/devchat/bin:/devchat/node_modules/.bin
 
-function wechaty::banner() {
+function devchat::banner() {
   echo
-  figlet " Wechaty "
+  figlet " DevChat "
   echo ____________________________________________________
   echo "            https://www.chatie.io"
 }
 
-function wechaty::errorBotNotFound() {
+function devchat::errorBotNotFound() {
   local file=$1
   echo "Container ERROR: can not found bot file: $HOME/$file"
 
@@ -44,26 +44,26 @@ function wechaty::errorBotNotFound() {
       extensions hidden by default).
 
     if you still have issue, please have a look at
-      https://github.com/wechaty/wechaty/issues/66
+      upstream issue #66
       and do a search in issues, that might be help.
 
 TROUBLESHOOTING
 }
 
-function wechaty::printEnv () {
-  num=$(env | grep -c WECHATY)
-  echo "WECHATY Environment Variables: $num"
-  env | grep WECHATY
+function devchat::printEnv () {
+  num=$(env | grep -c DEVCHAT)
+  echo "DEVCHAT Environment Variables: $num"
+  env | grep DEVCHAT
 }
 
-function wechaty::errorCtrlC () {
+function devchat::errorCtrlC () {
   # http://www.tldp.org/LDP/abs/html/exitcodes.html
   # 130 Script terminated by Control-C  Ctl-C Control-C is fatal error signal 2, (130 = 128 + 2, see above)
   echo ' Script terminated by Control-C '
   figlet ' Ctrl + C '
 }
 
-function wechaty::pressEnterToContinue() {
+function devchat::pressEnterToContinue() {
   local -i timeoutSecond=${1:-30}
   local message=${2:-'Press ENTER to continue ... '}
 
@@ -71,14 +71,14 @@ function wechaty::pressEnterToContinue() {
   echo
 }
 
-function wechaty::diagnose() {
+function devchat::diagnose() {
   local -i ret=$1  && shift
   local file=$1 && shift
 
   echo "ERROR: Bot exited with code $ret"
 
   figlet ' BUG REPORT '
-  wechaty::pressEnterToContinue 30
+  devchat::pressEnterToContinue 30
 
   echo
   echo "### 1. source code of $file"
@@ -102,7 +102,7 @@ function wechaty::diagnose() {
   ls "$HOME"/node_modules || echo "No node_modules"
 
   echo
-  echo '### 5. wechaty doctor'
+  echo '### 5. devchat doctor'
   echo
   devchat-doctor
 
@@ -110,17 +110,17 @@ function wechaty::diagnose() {
   echo _____________________________________________________________
   echo '####### please paste all the above diagnose messages #######'
   echo
-  echo 'Wechaty Issue https://github.com/wechaty/wechaty/issues'
+  echo 'DevChat Issue https://github.com/jrnoorbaloch/devChat/issues'
   echo
 
-  wechaty::pressEnterToContinue
+  devchat::pressEnterToContinue
 }
 
-function wechaty::runBot() {
+function devchat::runBot() {
   local botFile=$1
 
   if [ ! -f "$HOME/$botFile" ]; then
-    wechaty::errorBotNotFound "$botFile"
+    devchat::errorBotNotFound "$botFile"
     return 1
   fi
 
@@ -138,14 +138,14 @@ function wechaty::runBot() {
     # yarn < /dev/null || return $? # yarn will close stdin??? cause `read` command fail after yarn
 
     #
-    # Issue https://github.com/wechaty/wechaty/issues/1478
+    # Issue upstream issue #1478
     #   As a conclusion: we should better not to link the local node_modules to the Docker global.
     #
-    # wechaty::linkBotNodeModules
+    # devchat::linkBotNodeModules
   }
 
-  # echo -n "Linking Wechaty module to bot ... "
-  # npm link wechaty < /dev/null > /dev/null 2>&1
+  # echo -n "Linking DevChat module to bot ... "
+  # npm link devchat < /dev/null > /dev/null 2>&1
   # echo "linked. "
 
   # npm --progress=false install @types/node > /dev/null
@@ -166,7 +166,7 @@ function wechaty::runBot() {
         &
       ;;
     *)
-      echo "ERROR: wechaty::runBot() neither .{js,cjs,mjs} nor .ts"
+      echo "ERROR: devchat::runBot() neither .{js,cjs,mjs} nor .ts"
       exit 1 &
   esac
 
@@ -176,19 +176,19 @@ function wechaty::runBot() {
     0)
       ;;
     130)
-      wechaty::errorCtrlC
+      devchat::errorCtrlC
       ;;
     *)
-      wechaty::diagnose "$ret" "$@"
+      devchat::diagnose "$ret" "$@"
       ;;
   esac
 
   return "$ret"
 }
 
-# Issue https://github.com/wechaty/wechaty/issues/1478
+# Issue upstream issue #1478
 # To Be Tested:
-function wechaty::linkBotNodeModules() {
+function devchat::linkBotNodeModules() {
   for localModule in /bot/node_modules/*; do
     [ -e "$localModule" ] || continue
 
@@ -204,39 +204,39 @@ function wechaty::linkBotNodeModules() {
   done
 }
 
-function wechaty::io-client() {
+function devchat::io-client() {
   figlet " Chatie.io "
   figlet " Authing By:"
   echo
-  echo "WECHATY_TOKEN=$WECHATY_TOKEN "
+  echo "DEVCHAT_TOKEN=$DEVCHAT_TOKEN "
   echo
 
-  pushd /wechaty
+  pushd /devchat
   npm run io-client
   popd
 }
 
-function wechaty::help() {
+function devchat::help() {
   figlet " Docker Usage: "
   cat <<HELP
 
 
 
-  Usage: wechaty [ mybot.js | mybot.ts | COMMAND ]
+  Usage: devchat [ mybot.js | mybot.ts | COMMAND ]
 
-  Run a JavaScript/TypeScript <Bot File>, or a <Wechaty Command>.
+  Run a JavaScript/TypeScript <Bot File>, or a <DevChat Command>.
 
   <Bot File>:
     mybot.js: a JavaScript program for your bot.
     mybot.ts: a TypeScript program for your bot.
 
   <Commands>:
-    demo    Run Wechaty DEMO
+    demo    Run DevChat DEMO
     doctor  Print Diagnose Report
     test    Run Unit Test
 
   Learn more at:
-    https://github.com/wechaty/wechaty/wiki/Docker
+    https://devchat-docs.vercel.app/configuration#docker
 
 
 
@@ -247,23 +247,23 @@ function main() {
   # issue #84
   echo -e 'nameserver 114.114.114.114\nnameserver 1.1.1.1\nnameserver 8.8.8.8' | sudo tee -a /etc/resolv.conf > /dev/null
 
-  wechaty::banner
+  devchat::banner
   figlet Connecting
   figlet ChatBots
 
-  wechaty::printEnv
+  devchat::printEnv
 
-  VERSION=$(WECHATY_LOG=WARN devchat-version 2>/dev/null || echo '0.0.0(unknown)')
+  VERSION=$(DEVCHAT_LOG=WARN devchat-version 2>/dev/null || echo '0.0.0(unknown)')
 
   echo
-  echo -n "Starting Docker Container for Wechaty v$VERSION with "
+  echo -n "Starting Docker Container for DevChat v$VERSION with "
   echo -n "Node.js $(node --version) ..."
   echo
 
   local -i ret=0
 
   local defaultArg=help
-  if [ -n "$WECHATY_TOKEN" ]; then
+  if [ -n "$DEVCHAT_TOKEN" ]; then
     defaultArg=io-client
   fi
 
@@ -279,9 +279,9 @@ function main() {
     # 2. Run a bot
     #
     *.ts | *.js | *.cjs | *.mjs)
-      # set -e will not work inside wechaty::runBot because of
+      # set -e will not work inside devchat::runBot because of
       # http://stackoverflow.com/a/4073372/1123955
-      wechaty::runBot "$@" || ret=$?
+      devchat::runBot "$@" || ret=$?
       ;;
 
     #
@@ -293,21 +293,21 @@ function main() {
       ;;
 
     help|version)
-      wechaty::help
+      devchat::help
       ;;
 
     io-client)
-      wechaty::io-client
+      devchat::io-client
       ;;
 
     test)
-      # WECHATY_LOG=silent npm run test:unit
+      # DEVCHAT_LOG=silent npm run test:unit
       if [ -f "$HOME"/package.json ]; then
         pushd "$HOME"
       else
-        pushd /wechaty
+        pushd /devchat
       fi
-      WECHATY_LOG=silent npm run test
+      DEVCHAT_LOG=silent npm run test
       popd
       ;;
 
@@ -320,7 +320,7 @@ function main() {
      ;;
   esac
 
-  wechaty::banner
+  devchat::banner
   figlet " Exit $ret "
   return $ret
 }

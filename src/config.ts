@@ -20,6 +20,9 @@
  */
 /// <reference path="./io-peer/json-rpc-peer.d.ts" />
 
+// Must stay the first import: see env-bridge.ts.
+import './env-bridge.ts'
+
 import {
   log,
 }                   from 'wechaty-puppet'
@@ -31,14 +34,15 @@ import {
   type OfficialPuppetNpmName,
   OFFICIAL_PUPPET_DEFAULT,
 }                      from './puppet-config.ts'
+import { resolvePuppetAlias } from './setup/messengers.ts'
 import {
   packageJson,
   GIT_COMMIT_HASH,
 }                       from './package-json.ts'
 
-type PackageJsonWechaty = {
+type PackageJsonDevChat = {
   version?: string
-  wechaty: {
+  devchat: {
     DEFAULT_PORT: number
     DEFAULT_PROTOCOL: string
     DEFAULT_APIHOST: string
@@ -59,7 +63,7 @@ if (log.level() === 'verbose' || log.level() === 'silly') {
    */
   process.on('unhandledRejection', (reason: Error | any, promise) => {
     log.error('Config', '###########################')
-    log.error('Config', 'Wechaty unhandledRejection: %s %s', reason.stack || reason, promise)
+    log.error('Config', 'DevChat unhandledRejection: %s %s', reason.stack || reason, promise)
     log.error('Config', '###########################')
     promise.catch(err => {
       log.error('Config', 'process.on(unhandledRejection) promise.catch(%s)', err.message)
@@ -71,7 +75,7 @@ if (log.level() === 'verbose' || log.level() === 'silly') {
     const origin = arguments[1] // to compatible with node 12 or below version typings
 
     log.error('Config', '###########################')
-    log.error('Config', 'Wechaty uncaughtException: %s %s', error.stack, origin)
+    log.error('Config', 'DevChat uncaughtException: %s %s', error.stack, origin)
     log.error('Config', '###########################')
   })
 }
@@ -82,26 +86,21 @@ export interface DefaultSetting {
   DEFAULT_PROTOCOL : string,
 }
 
-const DEFAULT_SETTING = packageJson['wechaty'] as DefaultSetting
+const DEFAULT_SETTING = packageJson['devchat'] as DefaultSetting
 
 /**
  * Read a devChat setting from the environment.
  *
- * devChat is a fork of Wechaty, so every setting can be provided either with
- * the new `DEVCHAT_` prefix or with the legacy `WECHATY_` prefix. The
- * `DEVCHAT_` variable always wins when both are set, which lets existing
- * Wechaty deployments migrate one variable at a time.
- *
  * @param key - setting name without prefix, e.g. `PUPPET` or `TOKEN`.
  * @param env - environment to read from; defaults to `process.env` and is
- *              injectable so the precedence rule can be unit tested.
- * @returns the first non-empty value, or `undefined` when neither is set.
+ *              injectable for unit tests.
+ * @returns the value of `DEVCHAT_<key>`, or `undefined` when unset or empty.
  */
 export function envSetting (
   key: string,
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined {
-  return env[`DEVCHAT_${key}`] || env[`WECHATY_${key}`] || undefined
+  return env[`DEVCHAT_${key}`] || undefined
 }
 
 export class Config {
@@ -112,9 +111,14 @@ export class Config {
 
   serviceIp = envSetting('PUPPET_SERVICE_IP') || ''
 
+  /**
+   * Puppet package to use when none is passed to the builder.
+   * `DEVCHAT_PUPPET` may be a friendly messenger name (`wechat`, `whatsapp`)
+   * or a full puppet package name.
+   */
   systemPuppetName (): OfficialPuppetNpmName {
-    return (
-      envSetting('PUPPET') || OFFICIAL_PUPPET_DEFAULT
+    return resolvePuppetAlias(
+      envSetting('PUPPET') || OFFICIAL_PUPPET_DEFAULT,
     ).toLowerCase() as OfficialPuppetNpmName
   }
 
@@ -160,7 +164,7 @@ export const AT_SEPARATOR_REGEX = /[\u2005\u0020]/
 
 export function qrcodeValueToImageUrl (qrcodeValue: string): string {
   return [
-    'https://wechaty.js.org/qrcode/',
+    'https://devchat-docs.vercel.app/qrcode/',
     encodeURIComponent(qrcodeValue),
   ].join('')
 }
@@ -173,7 +177,7 @@ export function isProduction (): boolean {
 const config = new Config()
 
 export type {
-  PackageJsonWechaty,
+  PackageJsonDevChat,
 }
 export {
   log,

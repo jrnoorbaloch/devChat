@@ -1,5 +1,5 @@
 export {
   messageToSayable,
-  payloadToSayableWechaty,
+  payloadToSayableDevChat,
   sayableToPayload,
 }                           from '../sayable/mod.ts'

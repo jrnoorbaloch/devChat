@@ -25,7 +25,7 @@ import assert from 'node:assert/strict'
 import type * as PUPPET from 'wechaty-puppet'
 import { PuppetMock }   from 'wechaty-puppet-mock'
 
-import { WechatyBuilder } from '../wechaty-builder.ts'
+import { DevChatBuilder } from '../devchat-builder.ts'
 import type {
   RoomImpl,
   RoomProtectedProperty,
@@ -37,16 +37,16 @@ test('findAll()', async t => {
   const EXPECTED_ROOM_ID_LIST = [ EXPECTED_ROOM_ID ]
 
   const puppet = new PuppetMock()
-  const wechaty = WechatyBuilder.build({ puppet })
+  const devchat = DevChatBuilder.build({ puppet })
   let started = false
   t.after(async () => {
     if (started) {
-      await wechaty.stop()
+      await devchat.stop()
     }
   })
 
   started = true
-  await wechaty.start()
+  await devchat.start()
 
   t.mock.method(puppet, 'roomSearch', async () => EXPECTED_ROOM_ID_LIST)
   t.mock.method(puppet, 'roomPayload', async () => {
@@ -56,11 +56,11 @@ test('findAll()', async t => {
     } as PUPPET.payloads.Room
   })
 
-  const roomList = await wechaty.Room.findAll()
+  const roomList = await devchat.Room.findAll()
   assert.equal(roomList.length, 1, 'should find 1 room')
   assert.equal(await roomList[0]!.topic(), EXPECTED_ROOM_TOPIC, 'should get topic from payload')
 
-  await wechaty.stop()
+  await devchat.stop()
   started = false
 })
 
@@ -69,7 +69,7 @@ test('room.say() smoke testing', async t => {
   const callback = t.mock.fn()
 
   const puppet = new PuppetMock()
-  const wechaty = WechatyBuilder.build({ puppet })
+  const devchat = DevChatBuilder.build({ puppet })
 
   const bot = puppet.mocker.createContact()
   puppet.mocker.login(bot)
@@ -77,12 +77,12 @@ test('room.say() smoke testing', async t => {
   let started = false
   t.after(async () => {
     if (started) {
-      await wechaty.stop()
+      await devchat.stop()
     }
   })
 
   started = true
-  await wechaty.start()
+  await devchat.start()
 
   const EXPECTED_ROOM_ID         = 'roomId'
   const EXPECTED_ROOM_TOPIC      = 'test-topic'
@@ -122,9 +122,9 @@ test('room.say() smoke testing', async t => {
   t.mock.method(puppet, 'contactSearch', fakeIdSearcher)
   t.mock.method(puppet, 'roomSearch', fakeIdSearcher)
 
-  const room = await wechaty.Room.find({ id: EXPECTED_ROOM_ID })
-  const contact1 = await wechaty.Contact.find({ id: EXPECTED_CONTACT_1_ID })
-  const contact2 = await wechaty.Contact.find({ id: EXPECTED_CONTACT_2_ID })
+  const room = await devchat.Room.find({ id: EXPECTED_ROOM_ID })
+  const contact1 = await devchat.Contact.find({ id: EXPECTED_CONTACT_1_ID })
+  const contact2 = await devchat.Contact.find({ id: EXPECTED_CONTACT_2_ID })
 
   if (!room || !contact1 || !contact2) {
     throw new Error('find by id: not found')
@@ -169,14 +169,14 @@ test('room.say() smoke testing', async t => {
     ], 'Multiple mention should work with new way')
   })
 
-  await wechaty.stop()
+  await devchat.stop()
   started = false
 })
 
 test('ProtectedProperties', async _t => {
-  type NotExistInWechaty = Exclude<RoomProtectedProperty, keyof RoomImpl>
-  type NotExistTest = NotExistInWechaty extends never ? true : false
+  type NotExistInDevChat = Exclude<RoomProtectedProperty, keyof RoomImpl>
+  type NotExistTest = NotExistInDevChat extends never ? true : false
 
   const noOneLeft: NotExistTest = true
-  assert.ok(noOneLeft, 'should match Wechaty properties for every protected property')
+  assert.ok(noOneLeft, 'should match DevChat properties for every protected property')
 })

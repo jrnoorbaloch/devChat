@@ -463,11 +463,11 @@ function validateAndRender (runtime: 'node' | 'deno', testStatus: number, valida
     }
     const html = join(output, 'html')
     mkdirSync(html, { recursive: true })
-    const renderLcovPath = join(tmpdir(), `wechaty-${runtime}-render-${process.pid}.lcov`)
+    const renderLcovPath = join(tmpdir(), `devchat-${runtime}-render-${process.pid}.lcov`)
     writeFileSync(renderLcovPath, normalizeLcovForRenderer(readFileSync(lcovPath, 'utf8')))
     const renderArgs = [
       '--ignore-errors', 'inconsistent',
-      '--title=Wechaty native coverage',
+      '--title=DevChat native coverage',
       ...(runtime === 'deno' ? [ '--branch-coverage' ] : []),
       `--output-directory=${html}`,
       renderLcovPath,
@@ -515,7 +515,7 @@ function probe (runtime: 'node' | 'deno', output: string): number {
       test,
     ])
   }
-  const profile = join(tmpdir(), `wechaty-${runtime}-coverage-probe-${process.pid}`)
+  const profile = join(tmpdir(), `devchat-${runtime}-coverage-probe-${process.pid}`)
   rmSync(profile, { recursive: true, force: true })
   const env = denoEnvironment()
   const testStatus = run(denoBinary(), [
@@ -544,7 +544,7 @@ function nodeRuntimeCoverage (tests: string[]): number {
   mkdirSync(output, { recursive: true })
   const status = run(process.execPath, [ ...coverageArgs('coverage/node/lcov.info'), ...tests ])
   let probeStatus = 0
-  const probeOutput = join(tmpdir(), `wechaty-node-coverage-probe-${process.pid}.lcov`)
+  const probeOutput = join(tmpdir(), `devchat-node-coverage-probe-${process.pid}.lcov`)
   try {
     probeStatus = probe('node', probeOutput)
     assertCoverageProbe(readFileSync(probeOutput, 'utf8'), 'tests/fixtures/coverage-probe.ts')
@@ -578,7 +578,7 @@ function denoCoverage (tests: string[]): number {
   mkdirSync(output, { recursive: true })
   const nativeLcov = join(output, 'lcov-native.info')
   const denominator = join(output, 'unloaded.lcov')
-  const probeOutput = join(tmpdir(), `wechaty-deno-coverage-probe-${process.pid}.lcov`)
+  const probeOutput = join(tmpdir(), `devchat-deno-coverage-probe-${process.pid}.lcov`)
   let testStatus = 1
   let reportStatus = 0
   let denominatorStatus = 0

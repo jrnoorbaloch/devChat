@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * https://github.com/wechaty/wechaty
+ * https://github.com/jrnoorbaloch/devChat
  *
  * Author: Huan <zixia@zixia.net>
  * License: Apache-2.0
@@ -25,7 +25,7 @@ import * as cmds     from '../src/cli/mod.ts'
 
 const devChatCli = subcommands({
   name: 'devchat',
-  description: 'devChat CLI Utility (Wechaty compatible)',
+  description: 'devChat command line: init, gateway and more',
   version: VERSION,
   cmds,
 })
