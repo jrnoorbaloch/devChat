@@ -104,7 +104,7 @@ test('runInit() retries a failed install once, then prints fixes', async () => {
   const r = await runInit({ cwd, messenger: 'whatsapp' }, deps)
   assert.equal(r.exitCode, 1)
   assert.equal(calls, 2)
-  assert.ok(deps.lines.some(l => l.includes('PUPPETEER_SKIP_DOWNLOAD')), 'WhatsApp-specific help')
+  assert.ok(deps.lines.some(l => l.includes('Google Chrome or Microsoft Edge')), 'WhatsApp-specific help')
   assert.equal(existsSync(join(cwd, CONFIG_FILE_NAME)), false, 'no config written on failure')
 })
 

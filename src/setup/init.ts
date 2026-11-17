@@ -36,6 +36,7 @@ import {
 }                               from './messengers.ts'
 import {
   chromeMissingHelp,
+  npmEnvWithoutBrowserDownload,
   type ChromeLocation,
 }                               from './chrome.ts'
 import {
@@ -140,11 +141,7 @@ export function installFailureHelp (messengers: MessengerId[]): string[] {
     '  2. If npm reports a permissions error, do not use sudo; fix your npm folder or use nvm.',
   ]
   if (messengers.includes('whatsapp')) {
-    lines.push(
-      '  3. WhatsApp downloads Chrome. If that download is blocked, use an installed Chrome instead:',
-      '       PUPPETEER_SKIP_DOWNLOAD=1 npm run setup',
-      '       then set PUPPETEER_EXECUTABLE_PATH to your Chrome path before npm start.',
-    )
+    lines.push('  3. WhatsApp: make sure Google Chrome or Microsoft Edge is installed; devChat uses it automatically.')
   }
   lines.push(`Still stuck? Open an issue with the error above: https://github.com/jrnoorbaloch/devChat/issues`)
   return lines
@@ -376,6 +373,8 @@ export function npmInstall (specs: string[], cwd: string, save: boolean): Promis
     const saveFlag = save ? '--save' : '--no-save'
     const child = spawn('npm', [ 'install', saveFlag, '--no-audit', '--no-fund', ...specs ], {
       cwd,
+      // Skip puppeteer's Chrome download here; runInit() handles the browser.
+      env: npmEnvWithoutBrowserDownload(),
       stdio: 'inherit',
     })
     child.on('error', () => resolve(false))

@@ -25,9 +25,9 @@
  * probes, so it is unit tested for every OS. `installBundledChrome()` is the
  * only function with side effects (it runs puppeteer's browser installer).
  */
-import { existsSync } from 'node:fs'
+import { existsSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { join, posix, win32 } from 'node:path'
+import { dirname, join, posix, win32 } from 'node:path'
 
 import spawn from 'cross-spawn'
 
@@ -155,12 +155,55 @@ export function chromeMissingHelp (platform: NodeJS.Platform = process.platform)
 }
 
 /**
+ * Environment for npm installs that pull in puppeteer.
+ *
+ * puppeteer's own postinstall downloads Chrome, and a failed or interrupted
+ * download leaves a half-written cache folder that makes every later
+ * `npm install` fail ("browser folder exists but the executable is
+ * missing"). devChat prefers an installed Chrome/Edge and downloads Chrome
+ * itself only when needed, so the postinstall download is always skipped.
+ */
+export function npmEnvWithoutBrowserDownload (env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  return { ...env, PUPPETEER_SKIP_DOWNLOAD: env['PUPPETEER_SKIP_DOWNLOAD'] ?? '1' }
+}
+
+/**
+ * Remove a half-downloaded browser build so it can be downloaded again.
+ *
+ * puppeteer stores builds as `<cache>/<browser>/<platform>-<version>/<dir>/<exe>`.
+ * When the version folder exists but the executable does not, a previous
+ * download was interrupted and puppeteer refuses to retry; deleting that one
+ * version folder fixes it. Nothing is removed when the executable exists.
+ *
+ * @returns the removed folder, or `undefined` when nothing was broken.
+ */
+export function removeBrokenBrowserDownload (
+  executable: string | undefined,
+  fsOps: { exists: (p: string) => boolean, remove: (p: string) => void } = {
+    exists: safeExists,
+    remove: p => rmSync(p, { force: true, recursive: true }),
+  },
+): string | undefined {
+  if (!executable || fsOps.exists(executable)) {
+    return undefined
+  }
+  const versionDir = dirname(dirname(executable))
+  if (!/-\d+\.\d+/.test(versionDir) || !fsOps.exists(versionDir)) {
+    return undefined
+  }
+  fsOps.remove(versionDir)
+  return versionDir
+}
+
+/**
  * Download the Chrome build puppeteer expects (`npx puppeteer browsers
  * install chrome`), using the puppeteer version installed in `cwd`.
+ * A half-downloaded previous attempt is cleaned up first.
  *
  * @returns `true` when the installer exited successfully.
  */
 export function installBundledChrome (cwd: string): Promise<boolean> {
+  removeBrokenBrowserDownload(bundledChromePath(cwd))
   return new Promise(resolve => {
     const child = spawn('npx', [ '--no-install', 'puppeteer', 'browsers', 'install', 'chrome' ], {
       cwd,

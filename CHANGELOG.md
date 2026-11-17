@@ -10,6 +10,7 @@ All notable changes to devChat are listed here.
 - **Setup wizard** (`npm run setup`, `devchat init`, `devchat-init`): asks WeChat, WhatsApp or both, installs only the drivers that choice needs, and writes `devchat.config.json` and a starter `bot.ts`. Every question also has a flag (`--messenger`, `--yes`, `--skip-install`) or the `DEVCHAT_MESSENGERS` variable, so CI and Docker work too.
 - **`startDevChat()`:** runs one bot per chosen messenger with shared code. It prints login QR codes in the terminal, keeps one failing messenger from stopping the others, hides repeated errors and shuts down cleanly on Ctrl+C.
 - **WhatsApp finds a browser by itself:** it uses an installed Google Chrome, Chromium or Microsoft Edge when puppeteer's own Chrome was never downloaded. This fixes "Could not find Chrome" on Windows. Setup downloads Chrome only if no browser exists, and `npm start` no longer reports WhatsApp as started without one.
+- **No more broken Chrome downloads:** installing the WhatsApp driver skips puppeteer's automatic Chrome download. An interrupted download used to leave a half-written cache folder that made every later install fail. If Chrome must be downloaded, the broken folder is cleaned up first.
 - **`npm start`:** runs `bot.ts` and prints a one-line fix instead of a stack trace.
 - **Friendly messenger names:** `puppet: 'whatsapp'` / `DEVCHAT_PUPPET=wechat`.
 - **Browser QR page:** `https://devchat-docs.vercel.app/qrcode/<value>`. The code is drawn locally in the browser.
@@ -21,7 +22,8 @@ All notable changes to devChat are listed here.
 - Every public name now uses devChat branding: `DevChatBuilder`, `DevChat`, `DevChatOptions`, `DevChatPlugin`, `DevChatInterface`, and more.
 - Environment variables use the `DEVCHAT_` prefix (`DEVCHAT_PUPPET`, `DEVCHAT_LOG`, `DEVCHAT_TOKEN`, ...).
 - CLI binaries: `devchat`, `devchat-init`, `devchat-doctor`, `devchat-version`, `devchat-io-client` and `devchat-puppet-install`.
-- `npm install` never fails because of the contributor git hook. This was a problem on Windows without symlink rights.
+- `npm install` never fails because of the contributor git hook, and the hook no longer needs symlinks, so there is no EPERM note on Windows.
+- The Windows installer stops with a clear message instead of a PowerShell error block, and leaves the PowerShell window open.
 - `qrcode-terminal` is now a runtime dependency, so QR codes print out of the box.
 
 ### Removed

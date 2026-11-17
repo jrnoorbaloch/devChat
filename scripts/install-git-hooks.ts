@@ -16,7 +16,7 @@
  * problem is reported as a one-line note and the script exits 0; the hook is
  * a contributor convenience, not something users need.
  */
-import { existsSync, mkdirSync, rmSync, symlinkSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -41,8 +41,11 @@ function installHook (): void {
   mkdirSync(hooksPath, { recursive: true })
   const hookPath = resolve(hooksPath, 'pre-push')
   rmSync(hookPath, { force: true })
-  // Symlinks need Developer Mode or admin rights on Windows; failure is fine.
-  symlinkSync(resolve(repositoryRoot, 'scripts/pre-push.ts'), hookPath)
+  // A tiny shell shim instead of a symlink: symlinks need Developer Mode or
+  // admin rights on Windows, while Git for Windows runs sh hooks everywhere.
+  const target = resolve(repositoryRoot, 'scripts/pre-push.ts').replaceAll('\\', '/')
+  writeFileSync(hookPath, `#!/bin/sh\nexec node "${target}" "$@"\n`)
+  chmodSync(hookPath, 0o755)
 
   const configResult = spawnSync(
     'git',

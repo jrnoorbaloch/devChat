@@ -58,7 +58,7 @@ export const MESSENGERS: Readonly<Record<MessengerId, MessengerInfo>> = Object.f
     installSpec: 'wechaty-puppet-whatsapp@1.19.16',
     label: 'WhatsApp',
     notes: [
-      'Downloads a headless Chrome browser (about 150-200 MB) the first time.',
+      'Needs Google Chrome or Microsoft Edge. devChat uses the one you have and downloads Chrome (about 150 MB) only if neither is installed.',
       'Uses WhatsApp Web, not the official WhatsApp Business API. Use a test number; automated accounts can be restricted by WhatsApp.',
     ],
     puppet: 'wechaty-puppet-whatsapp',
