@@ -81,3 +81,8 @@ website/dist/
 # Created by `npm run setup` (local to each user)
 /bot.ts
 /devchat.config.json
+
+# Login sessions created when the bot runs: they can log in as your bot. Never commit.
+.wwebjs_auth/
+.wwebjs_cache/
+*.memory-card.json
