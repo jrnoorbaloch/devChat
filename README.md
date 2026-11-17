@@ -30,7 +30,6 @@
 
 **devChat** is a developer-first **chatbot SDK** and **RPA (robotic process automation) framework** written in **TypeScript**. You write your bot logic once, against one clean API. Then you choose which messenger it runs on (WeChat, WhatsApp, WeCom/WXWork, Lark/Feishu, QQ, Gitter and more) by changing a single setting.
 
-devChat is a fork of the popular [Wechaty](https://github.com/wechaty/wechaty) project and stays API-compatible with it. On top of Wechaty's core it adds the pieces almost every bot ends up writing by hand:
 
 - 🧭 **`CommandRouter`**: `/slash` commands with quoted arguments, aliases, an automatic `/help`, and error isolation.
 - 💬 **`AutoReply`**: declarative keyword, RegExp and function rules for FAQ, support and greeter bots.
