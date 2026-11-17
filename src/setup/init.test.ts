@@ -28,7 +28,9 @@ function fakeDeps (over: Partial<InitDeps> = {}): InitDeps & { lines: string[], 
   const saves: boolean[] = []
   return {
     env: {},
+    findChrome: () => ({ path: '/usr/bin/google-chrome', source: 'system' }),
     install: async (specs, _cwd, save) => { installs.push(specs); saves.push(save); return true },
+    installChrome: async () => true,
     installs,
     interactive: false,
     lines,
@@ -131,4 +133,30 @@ test('starter bot imports from source inside the devChat repo itself', async () 
   assert.match(readFileSync(join(cwd, 'bot.ts'), 'utf8'), /from '\.\/src\/mods\/mod\.ts'/)
   assert.deepEqual(deps.saves, [ false ], 'never edits the tracked package.json of the devChat repo')
   assert.match(starterBotSource('devchat'), /startDevChat/)
+})
+
+test('runInit() downloads Chrome for WhatsApp only when no browser exists', async () => {
+  let found: { path: string, source: 'bundled' } | undefined
+  let downloads = 0
+  const deps = fakeDeps({
+    findChrome: () => found,
+    installChrome: async () => { downloads++; found = { path: '/cache/chrome', source: 'bundled' }; return true },
+  })
+  const r = await runInit({ cwd: project(), messenger: 'whatsapp' }, deps)
+  assert.equal(r.exitCode, 0)
+  assert.equal(downloads, 1)
+  assert.ok(deps.lines.some(l => l.includes('/cache/chrome')))
+
+  const present = fakeDeps({ installChrome: async () => { throw new Error('must not download') } })
+  assert.equal((await runInit({ cwd: project(), messenger: 'whatsapp' }, present)).exitCode, 0)
+
+  const wechatOnly = fakeDeps({ findChrome: () => { throw new Error('must not look for Chrome') } })
+  assert.equal((await runInit({ cwd: project(), messenger: 'wechat' }, wechatOnly)).exitCode, 0)
+})
+
+test('runInit() explains how to get Chrome when the download fails', async () => {
+  const deps = fakeDeps({ findChrome: () => undefined, installChrome: async () => false })
+  const r = await runInit({ cwd: project(), messenger: 'whatsapp' }, deps)
+  assert.equal(r.exitCode, 1)
+  assert.ok(deps.lines.some(l => l.includes('google.com/chrome')))
 })

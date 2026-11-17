@@ -19,8 +19,9 @@
   <li>Behind a company proxy: <code>npm config set proxy http://proxy:port</code> and <code>npm config set https-proxy http://proxy:port</code>.</li>
 </ul>
 
-<h2 id="chrome">WhatsApp: Chrome download fails</h2>
-<p>WhatsApp runs through a headless Chrome. If downloading Chrome is blocked on your network, use a Chrome that is already installed:</p>
+<h2 id="chrome">WhatsApp: "Could not find Chrome"</h2>
+<p>WhatsApp runs through a headless Chromium browser. devChat looks for one automatically, in this order: <code>PUPPETEER_EXECUTABLE_PATH</code>, the Chrome that puppeteer downloaded, then an installed Google Chrome, Chromium or Microsoft Edge. Edge is preinstalled on Windows 10/11. Setup downloads Chrome only if none of these exist.</p>
+<p>If you still see this error, update devChat (run the installer again) or run <code>npm run setup</code>. To choose a browser yourself:</p>
 <pre><code># macOS / Linux
 PUPPETEER_SKIP_DOWNLOAD=1 npm run setup -- --messenger whatsapp
 export PUPPETEER_EXECUTABLE_PATH="/usr/bin/google-chrome"

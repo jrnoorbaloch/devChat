@@ -21,6 +21,7 @@ import {
 }                 from 'cmd-ts'
 
 import { npmInstall, runInit } from '../setup/init.ts'
+import { findChrome, installBundledChrome } from '../setup/chrome.ts'
 
 /**
  * Run the wizard against the real terminal.
@@ -32,7 +33,9 @@ export async function runInitCli (opts: { messenger?: string, yes?: boolean, ski
   try {
     const result = await runInit(opts, {
       env: process.env,
+      findChrome: cwd => findChrome({ cwd }),
       install: npmInstall,
+      installChrome: installBundledChrome,
       interactive,
       nodeVersion: process.versions.node,
       print: line => console.info(line),

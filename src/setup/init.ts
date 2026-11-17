@@ -35,6 +35,10 @@ import {
   type MessengerId,
 }                               from './messengers.ts'
 import {
+  chromeMissingHelp,
+  type ChromeLocation,
+}                               from './chrome.ts'
+import {
   CONFIG_FILE_NAME,
   readProjectConfig,
   writeProjectConfig,
@@ -71,6 +75,10 @@ export interface InitDeps {
   nodeVersion: string
   /** Environment (for `DEVCHAT_MESSENGERS`). */
   env: NodeJS.ProcessEnv
+  /** Locate a browser for WhatsApp (see `chrome.ts`). */
+  findChrome: (cwd: string) => ChromeLocation | undefined
+  /** Download puppeteer's Chrome build into the user cache; resolve `true` on success. */
+  installChrome: (cwd: string) => Promise<boolean>
 }
 
 /** Outcome of {@link runInit}. `exitCode` 0 means ready to `npm start`. */
@@ -228,7 +236,7 @@ async function askMessengers (deps: InitDeps, fallback: MessengerId[]): Promise<
  * Run the setup wizard.
  *
  * Steps: check Node.js -> choose messengers -> install missing drivers ->
- * write `devchat.config.json` -> create `bot.ts` (unless it exists) -> print
+ * make sure WhatsApp has a browser -> write `devchat.config.json` -> create `bot.ts` (unless it exists) -> print
  * next steps. Never throws for expected problems; returns a non-zero
  * `exitCode` after printing a fix instead.
  */
@@ -307,7 +315,28 @@ export async function runInit (options: InitOptions, deps: InitDeps): Promise<In
     say('✔ Installed')
   }
 
-  // 3. Remember the choice and create a starter bot.
+  // 3. WhatsApp needs a Chromium browser. Prefer one already on the computer;
+  //    download puppeteer's Chrome only when none exists, because that
+  //    download is the step most often blocked by networks and antivirus.
+  if (messengers.includes('whatsapp')) {
+    let chrome = deps.findChrome(cwd)
+    if (!chrome && !options.skipInstall) {
+      say('… No Chrome found for WhatsApp. Downloading it (about 150 MB)')
+      if (await deps.installChrome(cwd)) {
+        chrome = deps.findChrome(cwd)
+      }
+    }
+    if (chrome) {
+      say(`✔ Browser for WhatsApp: ${chrome.path}`)
+    } else if (options.skipInstall) {
+      say('! No Chrome found for WhatsApp yet. Install Google Chrome before npm start.')
+    } else {
+      chromeMissingHelp().forEach(say)
+      return { exitCode: 1, messengers }
+    }
+  }
+
+  // 4. Remember the choice and create a starter bot.
   const createdFiles = [ writeProjectConfig(cwd, { messengers }) ]
   say(`✔ Saved ${CONFIG_FILE_NAME}`)
 

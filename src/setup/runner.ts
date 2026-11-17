@@ -27,6 +27,7 @@ import { DevChatBuilder }        from '../devchat-builder.ts'
 import type { DevChatInterface } from '../devchat/mod.ts'
 import { qrcodeValueToImageUrl } from '../config.ts'
 
+import { chromeMissingHelp, findChrome } from './chrome.ts'
 import { readProjectConfig }     from './config-file.ts'
 import { isPackageInstalled }    from './init.ts'
 import {
@@ -114,9 +115,16 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
   const cwd        = options.cwd ?? process.cwd()
   const messengers = chooseMessengers(options)
   const showQr     = options.showQrInTerminal ?? true
+  /** Browser found for WhatsApp; set below before the WhatsApp bot is built. */
+  let chromePath: string | undefined
   const build      = options.buildBot ?? ((id: MessengerId) => DevChatBuilder.build({
     name: `devchat-${id}`,
     puppet: MESSENGERS[id].puppet as any,
+    // The WhatsApp driver passes `puppeteerOptions.puppeteer` to
+    // puppeteer.launch(); this is how it learns which browser to start.
+    ...(id === 'whatsapp' && chromePath
+      ? { puppetOptions: { puppeteerOptions: { puppeteer: { executablePath: chromePath } } } as any }
+      : {}),
   }))
 
   const started: DevChatInterface[] = []
@@ -126,6 +134,23 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
     if (!options.buildBot && !driverAvailable(info.puppet, cwd)) {
       console.error(`✖ [${info.label}] is not installed yet. Run:  npm run setup`)
       continue
+    }
+
+    // Check for a browser up front: without one the WhatsApp driver fails
+    // asynchronously after start() resolves, so the bot would look "started".
+    if (id === 'whatsapp' && !options.buildBot) {
+      const chrome = findChrome({ cwd })
+      if (!chrome) {
+        console.error(`✖ [${info.label}] cannot start.`)
+        chromeMissingHelp().forEach(line => console.error(line))
+        continue
+      }
+      chromePath = chrome.path
+      // Also export it: puppeteer reads this variable if the option is ever dropped.
+      process.env['PUPPETEER_EXECUTABLE_PATH'] ??= chrome.path
+      if (chrome.source === 'system') {
+        console.info(`  [${info.label}] using browser: ${chrome.path}`)
+      }
     }
 
     const bot = build(id)
