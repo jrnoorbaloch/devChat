@@ -33,7 +33,7 @@
   "rewrites": [
     {
       "source": "/qrcode/:value*",
-      "destination": "/qrcode.html"
+      "destination": "/qrcode"
     }
   ]
 }
