@@ -104,8 +104,8 @@ test('installDriverErrorGuard() keeps the process alive on an unhandled driver r
   skip: 'Deno' in globalThis,
 }, async () => {
   const { spawnSync } = await import('node:child_process')
-  const { fileURLToPath } = await import('node:url')
-  const runner = fileURLToPath(new URL('./runner.ts', import.meta.url))
+  // A file:// URL, not a path: import() rejects bare Windows paths (C:\\...).
+  const runner = new URL('./runner.ts', import.meta.url).href
   const script = `
     const { installDriverErrorGuard } = await import(${JSON.stringify(runner)})
     const { EventEmitter } = await import('node:events')
