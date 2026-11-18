@@ -44,6 +44,9 @@ npm start</code></pre>
   <li>If you spam it, the rate limiter pauses replies for a minute. This is intended.</li>
 </ul>
 
+<h2 id="driver-errors">"A messenger driver reported an error and devChat kept running"</h2>
+<p>A driver hit a bug while handling an event, and devChat logged it instead of crashing. For example, right after a WhatsApp login a group update can arrive before the driver has finished loading. If the message repeats every minute or the bot stops replying, restart with <code>npm start</code>. If it still happens, <a href="https://github.com/jrnoorbaloch/devChat/issues">open an issue</a> with the message.</p>
+
 <h2 id="debug">See technical details</h2>
 <pre><code>DEVCHAT_DEBUG=1 DEVCHAT_LOG=verbose npm start</code></pre>
 <p>Still stuck? <a href="https://github.com/jrnoorbaloch/devChat/issues">Open an issue</a> with the output, your OS, <code>node --version</code> and the messenger you picked.</p>

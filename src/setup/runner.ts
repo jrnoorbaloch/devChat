@@ -12,7 +12,8 @@
  * to run on WeChat and WhatsApp at once. This module builds one bot per
  * messenger, lets the caller install the same plugins/handlers on each, prints
  * login QR codes in the terminal, keeps one failing messenger from stopping
- * the others, and shuts every bot down cleanly on Ctrl+C.
+ * the others, keeps driver bugs from crashing the process, and shuts every
+ * bot down cleanly on Ctrl+C.
  *
  * Boundaries: it decides WHICH messengers run (options > devchat.config.json
  * > DEVCHAT_MESSENGERS > WeChat) and wires lifecycle logging. What the bot
@@ -51,6 +52,12 @@ export interface StartDevChatOptions {
   showQrInTerminal?: boolean
   /** Stop all bots on SIGINT/SIGTERM. Default `true`. */
   handleSignals?: boolean
+  /**
+   * Keep running when a messenger driver rejects a promise nobody handles,
+   * instead of letting Node.js exit. Default `true`. See
+   * {@link installDriverErrorGuard}.
+   */
+  guardDriverErrors?: boolean
   /** Build the bot for a messenger; injectable for tests. */
   buildBot?: (id: MessengerId) => DevChatInterface
 }
@@ -91,6 +98,62 @@ export function createRepeatFilter (windowMs = 60_000, now: () => number = Date.
   }
 }
 
+/** Readable one-line text for any rejection reason (Error, string, object). */
+export function describeError (reason: unknown): string {
+  if (reason instanceof Error) {
+    return reason.message || reason.name
+  }
+  if (typeof reason === 'object' && reason !== null) {
+    const r = reason as { message?: unknown, name?: unknown }
+    return String(r.message ?? r.name ?? JSON.stringify(reason))
+  }
+  return String(reason)
+}
+
+/**
+ * Build the `unhandledRejection` listener used by {@link installDriverErrorGuard}.
+ * Prints each distinct message at most once a minute; with `DEVCHAT_DEBUG`
+ * set it also prints the full reason.
+ */
+export function createDriverErrorHandler (
+  print: (line: string) => void = line => console.error(line),
+  env: NodeJS.ProcessEnv = process.env,
+): (reason: unknown) => void {
+  const show = createRepeatFilter()
+  return reason => {
+    const message = describeError(reason)
+    if (show(message)) {
+      print(`⚠ A messenger driver reported an error and devChat kept running: ${message}`)
+      if (env['DEVCHAT_DEBUG']) {
+        print(String((reason as Error)?.stack ?? reason))
+      }
+    }
+  }
+}
+
+/**
+ * Stop messenger-driver bugs from killing the bot process.
+ *
+ * Why: drivers register `async` event handlers on their messenger client.
+ * When one of them throws (for example the WhatsApp driver handling a group
+ * update before its cache is ready, right after login), the rejection is
+ * never caught and Node.js exits by default. For a long-running bot it is
+ * better to log the problem and keep serving messages.
+ *
+ * Scope: only installed by {@link startDevChat}, the application runner,
+ * never by the library itself, so embedding apps keep control of their own
+ * process. Synchronous uncaught exceptions are not touched: continuing after
+ * those is unsafe.
+ *
+ * @returns a function that removes the guard again.
+ */
+export function installDriverErrorGuard (
+  handler: (reason: unknown) => void = createDriverErrorHandler(),
+): () => void {
+  process.on('unhandledRejection', handler)
+  return () => { process.off('unhandledRejection', handler) }
+}
+
 /** Whether a puppet package can be loaded from the project or from devChat itself. */
 function driverAvailable (pkg: string, cwd: string): boolean {
   if (isPackageInstalled(pkg, cwd)) {
@@ -128,6 +191,7 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
   }))
 
   const started: DevChatInterface[] = []
+  const removeGuard = (options.guardDriverErrors ?? true) ? installDriverErrorGuard() : () => {}
 
   for (const id of messengers) {
     const info = MESSENGERS[id]
@@ -189,6 +253,7 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
   }
 
   if (started.length === 0) {
+    removeGuard()
     throw new Error('No bot could start. Run  npm run setup  and try again.')
   }
 

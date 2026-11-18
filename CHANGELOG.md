@@ -11,6 +11,7 @@ All notable changes to devChat are listed here.
 - **`startDevChat()`:** runs one bot per chosen messenger with shared code. It prints login QR codes in the terminal, keeps one failing messenger from stopping the others, hides repeated errors and shuts down cleanly on Ctrl+C.
 - **WhatsApp finds a browser by itself:** it uses an installed Google Chrome, Chromium or Microsoft Edge when puppeteer's own Chrome was never downloaded. This fixes "Could not find Chrome" on Windows. Setup downloads Chrome only if no browser exists, and `npm start` no longer reports WhatsApp as started without one.
 - **No more broken Chrome downloads:** installing the WhatsApp driver skips puppeteer's automatic Chrome download. An interrupted download used to leave a half-written cache folder that made every later install fail. If Chrome must be downloaded, the broken folder is cleaned up first.
+- **Driver bugs no longer stop your bot:** `startDevChat()` logs promise errors that a messenger driver leaves unhandled, then keeps running. Before, Node.js exited. This fixes the WhatsApp crash `ERR_INIT: no cache manager` right after login, when a group update arrived before the driver's cache was ready.
 - **`npm start`:** runs `bot.ts` and prints a one-line fix instead of a stack trace.
 - **Friendly messenger names:** `puppet: 'whatsapp'` / `DEVCHAT_PUPPET=wechat`.
 - **Browser QR page:** `https://devchat-docs.vercel.app/qrcode/<value>`. The code is drawn locally in the browser.
