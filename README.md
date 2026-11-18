@@ -56,9 +56,9 @@ cd devChat
 npm start
 ```
 
-The **devChat dashboard** opens in your browser. Scan the QR code with your phone, and the card switches to *Connected* by itself. After that the dashboard shows the account, message counts and a live feed.
+The **devChat dashboard** opens in your browser. Scan the QR code with your phone, and the card switches to *Connected* by itself. After that the dashboard works like a chat app: a chat list, a chat window for each conversation, and a box to reply as the bot.
 
-<p align="center"><img src="website/assets/dashboard.png" alt="devChat dashboard: WhatsApp and WeChat connected with a live message feed" width="760"></p>
+<p align="center"><img src="website/assets/dashboard.png" alt="devChat dashboard: chat list, a WhatsApp conversation and a reply box" width="760"></p>
 
 Something went wrong? Every error prints its fix, and the
 [troubleshooting guide](https://devchat-docs.vercel.app/troubleshooting) has the rest.
@@ -100,7 +100,7 @@ await startDevChat({
 - 🧭 **`CommandRouter`:** `/slash` commands with quoted arguments, aliases, an automatic `/help`, and error isolation.
 - 💬 **`AutoReply`:** keyword, RegExp and function rules for FAQ, support and greeter bots.
 - 🚦 **`RateLimiter`:** per-user throttling that protects your bot account.
-- 🖥️ **Local dashboard:** scan the login QR code in your browser and watch connection status and live messages. Log out with one click. It runs only on your computer.
+- 🖥️ **Local dashboard with a chat window:** scan the login QR code in your browser, then read every conversation and reply as the bot, with unread counts and search. It runs only on your computer.
 - 🛡️ **Errors you can act on:** setup and start print a fix, not a stack trace (`DEVCHAT_DEBUG=1` shows details).
 - 🧪 **Testable without a phone** using the mock driver.
 
