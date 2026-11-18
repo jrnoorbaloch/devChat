@@ -127,10 +127,12 @@ export function describeError (reason: unknown): string {
     // Minified browser code throws errors like "t"; add the type and code so
     // the line is at least searchable.
     const code = (reason as { code?: unknown }).code
-    const extra = [ reason.name !== 'Error' ? reason.name : '', code !== undefined ? `code ${String(code)}` : '' ]
+    const extra = [ reason.name !== 'Error' && reason.name !== reason.message ? reason.name : '', code !== undefined ? `code ${String(code)}` : '' ]
       .filter(Boolean).join(', ')
     const message = reason.message || reason.name
-    return message.length <= 3 || extra ? `${message}${extra ? ` (${extra})` : ''}` : message
+    // A one- or two-letter message is a minified error from WhatsApp Web.
+    const minified = message.length <= 2 ? 'internal WhatsApp Web error ' : ''
+    return `${minified}${message}${extra ? ` (${extra})` : ''}`
   }
   if (typeof reason === 'object' && reason !== null) {
     const r = reason as { message?: unknown, name?: unknown }

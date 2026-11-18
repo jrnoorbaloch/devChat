@@ -168,5 +168,12 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "allowScripts": {
+    "@swc/core": true,
+    "esbuild": true,
+    "leveldown": true,
+    "protobufjs": true,
+    "puppeteer": false
   }
 }

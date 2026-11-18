@@ -86,8 +86,11 @@ test('describeError() handles Errors, driver error objects and strings', () => {
   const waError = Object.assign(new Error('no cache manager'), { code: 1001, name: 'ERR_INIT' })
   assert.equal(describeError(waError), 'no cache manager (ERR_INIT, code 1001)')
   // Minified browser errors like the "t" seen in WhatsApp logs get their type added.
-  assert.equal(describeError(Object.assign(new TypeError('t'))), 't (TypeError)')
-  assert.equal(describeError(new Error('t')), 't')
+  assert.equal(describeError(new TypeError('t')), 'internal WhatsApp Web error t (TypeError)')
+  assert.equal(describeError(new Error('t')), 'internal WhatsApp Web error t')
+  // The exact case from the Windows log: class and message both minified to "t".
+  const minified = new Error('t'); minified.name = 't'
+  assert.equal(describeError(minified), 'internal WhatsApp Web error t', 'no "t (t)"')
   assert.equal(describeError({ name: 'ERR_INIT' }), 'ERR_INIT')
   assert.equal(describeError('plain'), 'plain')
 })
