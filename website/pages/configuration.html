@@ -28,7 +28,9 @@ await bot.start()</code></pre>
     <tr><td><code>DEVCHAT_PUPPET</code></td><td>Driver for <code>DevChatBuilder.build()</code> without a <code>puppet</code> option (<code>wechat</code> or <code>whatsapp</code>)</td></tr>
     <tr><td><code>DEVCHAT_NAME</code></td><td>Bot name. Also names the login session file, so restarts skip the QR scan</td></tr>
     <tr><td><code>DEVCHAT_LOG</code></td><td>Log level: <code>silly</code>, <code>verbose</code>, <code>info</code> (default), <code>warn</code>, <code>error</code></td></tr>
-    <tr><td><code>DEVCHAT_DEBUG</code></td><td>Show full technical error details</td></tr>
+    <tr><td><code>DEVCHAT_DEBUG</code></td><td>Show full technical error details and the raw browser/driver logs</td></tr>
+    <tr><td><code>DEVCHAT_UI</code></td><td><code>0</code> turns the dashboard off. QR codes are then printed in the terminal</td></tr>
+    <tr><td><code>DEVCHAT_UI_PORT</code></td><td>Dashboard port (default 3000; the next free port is used if it is busy)</td></tr>
     <tr><td><code>DEVCHAT_TOKEN</code></td><td>Token for a remote puppet service</td></tr>
     <tr><td><code>DEVCHAT_PUPPET_SERVICE_TOKEN</code>, <code>DEVCHAT_PUPPET_SERVICE_ENDPOINT</code></td><td>Connect to a remote puppet service</td></tr>
     <tr><td><code>DEVCHAT_PORT</code></td><td>HTTP port (<code>PORT</code> takes priority)</td></tr>

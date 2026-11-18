@@ -49,12 +49,16 @@ Which messenger do you want your bot to use?
   3) Both
 ```
 
-Only what you choose gets installed. WhatsApp's headless Chrome is skipped if you pick WeChat only. Then:
+Only what you choose gets installed. WhatsApp uses the Chrome or Edge you already have. Then:
 
 ```sh
 cd devChat
-npm start        # scan the QR code with your phone, then send /help to the bot
+npm start
 ```
+
+The **devChat dashboard** opens in your browser. Scan the QR code with your phone, and the card switches to *Connected* by itself. After that the dashboard shows the account, message counts and a live feed.
+
+<p align="center"><img src="website/assets/dashboard.png" alt="devChat dashboard: WhatsApp and WeChat connected with a live message feed" width="760"></p>
 
 Something went wrong? Every error prints its fix, and the
 [troubleshooting guide](https://devchat-docs.vercel.app/troubleshooting) has the rest.
@@ -96,7 +100,7 @@ await startDevChat({
 - 🧭 **`CommandRouter`:** `/slash` commands with quoted arguments, aliases, an automatic `/help`, and error isolation.
 - 💬 **`AutoReply`:** keyword, RegExp and function rules for FAQ, support and greeter bots.
 - 🚦 **`RateLimiter`:** per-user throttling that protects your bot account.
-- 📱 **QR login in the terminal**, plus a browser link that draws the code locally.
+- 🖥️ **Local dashboard:** scan the login QR code in your browser and watch connection status and live messages. Log out with one click. It runs only on your computer.
 - 🛡️ **Errors you can act on:** setup and start print a fix, not a stack trace (`DEVCHAT_DEBUG=1` shows details).
 - 🧪 **Testable without a phone** using the mock driver.
 

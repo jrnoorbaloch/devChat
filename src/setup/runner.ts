@@ -12,8 +12,9 @@
  * to run on WeChat and WhatsApp at once. This module builds one bot per
  * messenger, lets the caller install the same plugins/handlers on each, prints
  * login QR codes in the terminal, keeps one failing messenger from stopping
- * the others, keeps driver bugs from crashing the process, and shuts every
- * bot down cleanly on Ctrl+C.
+ * the others, keeps driver bugs from crashing the process, opens the local
+ * dashboard (QR login, status, live messages; see dashboard.ts), keeps the
+ * console readable, and shuts every bot down cleanly on Ctrl+C.
  *
  * Boundaries: it decides WHICH messengers run (options > devchat.config.json
  * > DEVCHAT_MESSENGERS > WeChat) and wires lifecycle logging. What the bot
@@ -23,12 +24,19 @@ import { createRequire } from 'node:module'
 
 import qrTerm from 'qrcode-terminal'
 import * as PUPPET from 'wechaty-puppet'
+import { log } from 'wechaty-puppet'
 
 import { DevChatBuilder }        from '../devchat-builder.ts'
 import type { DevChatInterface } from '../devchat/mod.ts'
 import { qrcodeValueToImageUrl } from '../config.ts'
 
 import { chromeMissingHelp, findChrome } from './chrome.ts'
+import {
+  attachBotToDashboard,
+  startDashboard,
+  type Dashboard,
+  type DashboardOptions,
+}                                from './dashboard.ts'
 import { readProjectConfig }     from './config-file.ts'
 import { isPackageInstalled }    from './init.ts'
 import {
@@ -48,8 +56,23 @@ export interface StartDevChatOptions {
    * before the bot starts. `label` is the human name, e.g. `WhatsApp`.
    */
   setup?: (bot: DevChatInterface, label: string, id: MessengerId) => void | Promise<void>
-  /** Print login QR codes in the terminal. Default `true`. */
+  /**
+   * Open the local dashboard (login QR codes, status, live messages) in the
+   * browser. Default `true` unless `DEVCHAT_UI=0`. Pass options to choose the
+   * port or to start it without opening a browser.
+   */
+  ui?: boolean | DashboardOptions
+  /**
+   * Print login QR codes in the terminal. Default: only when the dashboard
+   * is off or failed to start.
+   */
   showQrInTerminal?: boolean
+  /**
+   * Hide browser console chatter and info-level driver logs (they include
+   * full raw message payloads). Default `true`; `DEVCHAT_DEBUG=1` or an
+   * explicit `DEVCHAT_LOG` level turns it off.
+   */
+  quietDriverLogs?: boolean
   /** Stop all bots on SIGINT/SIGTERM. Default `true`. */
   handleSignals?: boolean
   /**
@@ -101,7 +124,13 @@ export function createRepeatFilter (windowMs = 60_000, now: () => number = Date.
 /** Readable one-line text for any rejection reason (Error, string, object). */
 export function describeError (reason: unknown): string {
   if (reason instanceof Error) {
-    return reason.message || reason.name
+    // Minified browser code throws errors like "t"; add the type and code so
+    // the line is at least searchable.
+    const code = (reason as { code?: unknown }).code
+    const extra = [ reason.name !== 'Error' ? reason.name : '', code !== undefined ? `code ${String(code)}` : '' ]
+      .filter(Boolean).join(', ')
+    const message = reason.message || reason.name
+    return message.length <= 3 || extra ? `${message}${extra ? ` (${extra})` : ''}` : message
   }
   if (typeof reason === 'object' && reason !== null) {
     const r = reason as { message?: unknown, name?: unknown }
@@ -123,7 +152,8 @@ export function createDriverErrorHandler (
   return reason => {
     const message = describeError(reason)
     if (show(message)) {
-      print(`⚠ A messenger driver reported an error and devChat kept running: ${message}`)
+      print(`⚠ A messenger driver reported an error and devChat kept running: ${message}`
+        + (env['DEVCHAT_DEBUG'] ? '' : '  (details: set DEVCHAT_DEBUG=1)'))
       if (env['DEVCHAT_DEBUG']) {
         print(String((reason as Error)?.stack ?? reason))
       }
@@ -154,6 +184,37 @@ export function installDriverErrorGuard (
   return () => { process.off('unhandledRejection', handler) }
 }
 
+/**
+ * Quiet the console for normal use.
+ *
+ * The WhatsApp Web client copies every browser console line to stdout as
+ * `PUPPETEER PAGE LOG: ...` (hundreds per minute), and drivers log each raw
+ * message at info level, including phone numbers and message secrets. Both
+ * drown out the lines users need. This hides the browser lines and lowers
+ * the shared driver logger to `warn`, unless the user asked for detail with
+ * `DEVCHAT_DEBUG` or an explicit `DEVCHAT_LOG` level.
+ *
+ * @returns a function that restores the previous behaviour.
+ */
+export function quietDriverLogs (env: NodeJS.ProcessEnv = process.env): () => void {
+  if (env['DEVCHAT_DEBUG'] || env['DEVCHAT_LOG']) {
+    return () => {}
+  }
+  const previousLevel = log.level()
+  log.level('warn')
+  const original = console.log
+  console.log = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].startsWith('PUPPETEER PAGE LOG')) {
+      return
+    }
+    original.apply(console, args)
+  }
+  return () => {
+    console.log = original
+    log.level(previousLevel)
+  }
+}
+
 /** Whether a puppet package can be loaded from the project or from devChat itself. */
 function driverAvailable (pkg: string, cwd: string): boolean {
   if (isPackageInstalled(pkg, cwd)) {
@@ -177,7 +238,20 @@ function driverAvailable (pkg: string, cwd: string): boolean {
 export async function startDevChat (options: StartDevChatOptions = {}): Promise<DevChatInterface[]> {
   const cwd        = options.cwd ?? process.cwd()
   const messengers = chooseMessengers(options)
-  const showQr     = options.showQrInTerminal ?? true
+  const restoreLogs = (options.quietDriverLogs ?? true) ? quietDriverLogs() : () => {}
+
+  // Dashboard first, so its address is printed before any login QR code.
+  const uiWanted = options.ui ?? process.env['DEVCHAT_UI'] !== '0'
+  let dashboard: Dashboard | undefined
+  if (uiWanted) {
+    try {
+      dashboard = await startDashboard(typeof uiWanted === 'object' ? uiWanted : {})
+      console.info(`\n📊 devChat dashboard: ${dashboard.url}  (scan the login QR code there)\n`)
+    } catch (error) {
+      console.error(`⚠ Dashboard could not start (${(error as Error).message}). Showing QR codes here instead.`)
+    }
+  }
+  const showQr     = options.showQrInTerminal ?? !dashboard
   /** Browser found for WhatsApp; set below before the WhatsApp bot is built. */
   let chromePath: string | undefined
   const build      = options.buildBot ?? ((id: MessengerId) => DevChatBuilder.build({
@@ -191,6 +265,7 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
   }))
 
   const started: DevChatInterface[] = []
+  const byId = new Map<MessengerId, DevChatInterface>()
   const removeGuard = (options.guardDriverErrors ?? true) ? installDriverErrorGuard() : () => {}
 
   for (const id of messengers) {
@@ -218,6 +293,9 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
     }
 
     const bot = build(id)
+    if (dashboard) {
+      attachBotToDashboard(dashboard, bot, id, info.label)
+    }
     const showError = createRepeatFilter()
     bot
       .on('scan', (qrcode: string, status: PUPPET.types.ScanStatus) => {
@@ -226,6 +304,11 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
           console.info(`\n📱 [${info.label}] Scan this QR code to log in:`)
           qrTerm.generate(qrcode, { small: true })
           console.info(`   Or open it in a browser: ${qrcodeValueToImageUrl(qrcode)}\n`)
+        }
+      })
+      .on('scan', (_qrcode: string, status: PUPPET.types.ScanStatus) => {
+        if (dashboard && !showQr && status === PUPPET.types.ScanStatus.Waiting) {
+          console.info(`📱 [${info.label}] Waiting for login: scan the QR code at ${dashboard.url}`)
         }
       })
       .on('login',  user => console.info(`✅ [${info.label}] Logged in as ${user.name()}`))
@@ -243,6 +326,7 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
     try {
       await bot.start()
       started.push(bot)
+      byId.set(id, bot)
       console.info(`▶ [${info.label}] bot started`)
     } catch (error) {
       console.error(`✖ [${info.label}] could not start: ${(error as Error).message}`)
@@ -254,13 +338,22 @@ export async function startDevChat (options: StartDevChatOptions = {}): Promise<
 
   if (started.length === 0) {
     removeGuard()
+    restoreLogs()
+    await dashboard?.close()
     throw new Error('No bot could start. Run  npm run setup  and try again.')
   }
+
+  dashboard?.onLogout(async id => {
+    const bot = byId.get(id)
+    if (!bot) throw new Error(`No running bot for ${id}`)
+    await bot.logout()
+  })
 
   if (options.handleSignals ?? true) {
     const stopAll = async () => {
       console.info('\nStopping bots…')
       await Promise.allSettled(started.map(bot => bot.stop()))
+      await dashboard?.close()
       process.exit(0)
     }
     process.once('SIGINT', stopAll)

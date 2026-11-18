@@ -160,7 +160,7 @@ export function starterBotSource (importFrom: string): string {
  *
  * Messengers to run are read from ${CONFIG_FILE_NAME}.
  * Change them any time with:  npm run setup
- * Start the bot with:         npm start
+ * Start the bot with:         npm start   (opens the devChat dashboard)
  */
 import { AutoReply, CommandRouter, startDevChat } from '${importFrom}'
 
@@ -184,9 +184,9 @@ await startDevChat({
       }),
     )
 
-    bot.on('message', message => {
-      console.info(\`[\${messenger}] \${message.talker().name()}: \${message.text()}\`)
-    })
+    // Every message also shows up live in the dashboard that npm start opens.
+    // Add your own handlers here, for example:
+    // bot.on('message', message => console.info(\`[\${messenger}] \${message.text()}\`))
   },
 })
 `
@@ -351,7 +351,8 @@ export async function runInit (options: InitOptions, deps: InitDeps): Promise<In
   say('')
   say('    npm start')
   say('')
-  say('A QR code will appear. Scan it with the phone app of the account the bot should use:')
+  say('The devChat dashboard opens in your browser and shows a QR code.')
+  say('Scan it with the phone app of the account the bot should use:')
   for (const m of messengers) {
     say(m === 'whatsapp'
       ? '  • WhatsApp: Settings → Linked devices → Link a device'

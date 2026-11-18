@@ -38,6 +38,8 @@ test('startDevChat() starts one bot per messenger and runs setup on each', async
     guardDriverErrors: false,
     handleSignals: false,
     messengers: [ 'wechat', 'whatsapp' ],
+    quietDriverLogs: false,
+    ui: false,
     setup: (_bot, label, id) => { seen.push(`${label}:${id}`) },
     showQrInTerminal: false,
   })
@@ -60,7 +62,9 @@ test('startDevChat() rejects with a clear message when nothing starts', async ()
       },
       handleSignals: false,
       messengers: [ 'wechat' ],
+      quietDriverLogs: false,
       showQrInTerminal: false,
+      ui: false,
     }),
     /npm run setup/,
   )
@@ -80,7 +84,10 @@ test('describeError() handles Errors, driver error objects and strings', () => {
   assert.equal(describeError(new Error('boom')), 'boom')
   // Shape of the WhatsApp driver error from the report: [ERR_INIT: no cache manager] { code: 1001 }
   const waError = Object.assign(new Error('no cache manager'), { code: 1001, name: 'ERR_INIT' })
-  assert.equal(describeError(waError), 'no cache manager')
+  assert.equal(describeError(waError), 'no cache manager (ERR_INIT, code 1001)')
+  // Minified browser errors like the "t" seen in WhatsApp logs get their type added.
+  assert.equal(describeError(Object.assign(new TypeError('t'))), 't (TypeError)')
+  assert.equal(describeError(new Error('t')), 't')
   assert.equal(describeError({ name: 'ERR_INIT' }), 'ERR_INIT')
   assert.equal(describeError('plain'), 'plain')
 })
